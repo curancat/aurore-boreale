@@ -43,13 +43,19 @@
             gap: 15px;
         }
 
+        /* Avatar sem imagens externas (Usa gradiente e CSS) */
         .icone-perfil {
             width: 60px; height: 60px;
             border-radius: 50%;
             border: 2px solid #c8aa6e;
-            background-color: #1e2328;
-            background-image: url('https://via.placeholder.com/60/1e2328/c8aa6e?text=Icon');
-            background-size: cover;
+            background: linear-gradient(135deg, #1e2328 0%, #463714 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: #f0e6d2;
+            text-shadow: 0 2px 5px black;
         }
 
         .info-perfil h2 { font-size: 1.2rem; }
@@ -245,7 +251,7 @@
     <!-- CABEÇALHO DO CLIENT -->
     <header>
         <div class="perfil-jogador">
-            <div class="icone-perfil"></div>
+            <div class="icone-perfil" id="avatar-letra">?</div>
             <div class="info-perfil">
                 <h2 id="nome-jogador">Carregando...</h2>
                 <p>Nível 1 • ID: <span id="id-jogador">#BRA1</span></p>
@@ -263,7 +269,7 @@
             
             <div class="membros-grupo" id="slots-grupo">
                 <div class="slot-jogador ocupado" id="meu-slot">
-                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #c8aa6e; margin-bottom: 10px;"></div>
+                    <div id="avatar-slot" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #1e2328, #c8aa6e); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 1.5rem; color: #000; font-weight: bold;">?</div>
                     <span id="nome-slot">Você</span>
                 </div>
                 <div class="slot-jogador">Aguardando...</div>
@@ -286,16 +292,8 @@
                 <button id="btn-add-amigo">+</button>
             </div>
 
-            <div class="lista-amigos" id="lista-amigos">
-                <!-- Amigo de Exemplo -->
-                <div class="amigo-item">
-                    <div class="amigo-info">
-                        <span class="amigo-nome">Faker#KR1</span>
-                        <span class="amigo-status">Online</span>
-                    </div>
-                    <button class="btn-convidar" data-nome="Faker#KR1">Convidar</button>
-                </div>
-            </div>
+            <!-- Lista de amigos inicia completamente limpa -->
+            <div class="lista-amigos" id="lista-amigos"></div>
         </aside>
     </main>
 
@@ -322,8 +320,16 @@
             if (user) {
                 // Jogador está logado, atualiza a interface
                 jogadorAtual = user.displayName || user.email.split('@')[0];
+                const letraInicial = jogadorAtual.charAt(0).toUpperCase();
+
+                // Atualiza os nomes
                 document.getElementById('nome-jogador').innerText = jogadorAtual;
                 document.getElementById('nome-slot').innerText = jogadorAtual;
+                
+                // Coloca a primeira letra do nome como Avatar dinâmico
+                document.getElementById('avatar-letra').innerText = letraInicial;
+                document.getElementById('avatar-slot').innerText = letraInicial;
+
                 document.getElementById('chat-mensagens').innerHTML += `<div class="msg-sistema">Bem-vindo(a), ${jogadorAtual}! Conectado ao Chat Global.</div>`;
             } else {
                 // Jogador não está logado, expulsa para a tela de login
@@ -342,12 +348,10 @@
         const chatInput = document.getElementById('input-chat');
         const chatBox = document.getElementById('chat-mensagens');
 
-        // Enviar mensagem para o banco de dados
         chatInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
                 const texto = chatInput.value.trim();
                 if (texto !== '') {
-                    // Envia pro Firebase na pasta 'lobby/chat'
                     push(ref(db, 'lobby/chat'), {
                         nome: jogadorAtual,
                         texto: texto,
@@ -358,10 +362,8 @@
             }
         });
 
-        // Escutar mensagens chegando do banco de dados (Sincroniza para todos)
         onChildAdded(ref(db, 'lobby/chat'), (snapshot) => {
             const data = snapshot.val();
-            // Verifica se a mensagem é sua para destacar a cor
             if(data.nome === jogadorAtual) {
                 chatBox.innerHTML += `<div class="msg-jogador"><span>Você:</span> ${data.texto}</div>`;
             } else {
@@ -375,7 +377,7 @@
             window.location.href = '../seleção/select.html';
         });
 
-        // 5. LÓGICA SOCIAL E GRUPO (Simulação Visual local)
+        // 5. LÓGICA SOCIAL E GRUPO
         const inputAddAmigo = document.getElementById('input-add-amigo');
         const btnAddAmigo = document.getElementById('btn-add-amigo');
         const listaAmigos = document.getElementById('lista-amigos');
@@ -398,23 +400,26 @@
                 inputAddAmigo.value = '';
                 chatBox.innerHTML += `<div class="msg-sistema">Você adicionou ${idAmigo}.</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
-                mapearBotoesConvidar(); // Atualiza os botões novos
+                mapearBotoesConvidar();
             }
         });
 
         // Convidar para o Grupo
         function mapearBotoesConvidar() {
             document.querySelectorAll('.btn-convidar').forEach(btn => {
-                // Remove o evento antigo para não duplicar, clona o botão
                 const novoBtn = btn.cloneNode(true);
                 btn.parentNode.replaceChild(novoBtn, btn);
 
                 novoBtn.addEventListener('click', (e) => {
                     const nomeAmigo = e.target.getAttribute('data-nome');
+                    const letraAmigo = nomeAmigo.charAt(0).toUpperCase();
+
                     if (slotsOcupados < 5) {
                         slotsGrupo[slotsOcupados].classList.add('ocupado');
                         slotsGrupo[slotsOcupados].innerHTML = `
-                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #463714; margin-bottom: 10px;"></div>
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #1e2328, #463714); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 1.5rem; color: #f0e6d2;">
+                                ${letraAmigo}
+                            </div>
                             ${nomeAmigo.split('#')[0]}
                         `;
                         slotsOcupados++;
@@ -426,8 +431,6 @@
                 });
             });
         }
-        mapearBotoesConvidar(); // Chama ao carregar a tela
-
     </script>
 </body>
 </html>
