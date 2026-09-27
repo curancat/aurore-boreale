@@ -247,12 +247,12 @@
         <div class="perfil-jogador">
             <div class="icone-perfil"></div>
             <div class="info-perfil">
-                <h2>SeuNomeDeJogador</h2>
-                <p>Nível 30 • ID: #BRA1</p>
+                <h2 id="nome-jogador">Carregando...</h2>
+                <p>Nível 1 • ID: <span id="id-jogador">#BRA1</span></p>
             </div>
         </div>
         <h3>LOBBY - AURORE BOREALE</h3>
-        <p style="color: #5c5b57; cursor: pointer;">Sair</p>
+        <p id="btn-sair" style="color: #5c5b57; cursor: pointer;">Sair</p>
     </header>
 
     <!-- ÁREA PRINCIPAL -->
@@ -262,19 +262,17 @@
             <h2 style="position: absolute; top: 20px;">Sua Sala</h2>
             
             <div class="membros-grupo" id="slots-grupo">
-                <!-- Jogador atual -->
-                <div class="slot-jogador ocupado">
+                <div class="slot-jogador ocupado" id="meu-slot">
                     <div style="width: 50px; height: 50px; border-radius: 50%; background: #c8aa6e; margin-bottom: 10px;"></div>
-                    Você
+                    <span id="nome-slot">Você</span>
                 </div>
-                <!-- Slots Vazios -->
                 <div class="slot-jogador">Aguardando...</div>
                 <div class="slot-jogador">Aguardando...</div>
                 <div class="slot-jogador">Aguardando...</div>
                 <div class="slot-jogador">Aguardando...</div>
             </div>
 
-            <button class="btn-jogar" onclick="iniciarPartida()">INICIAR PARTIDA</button>
+            <button class="btn-jogar" id="btn-jogar">INICIAR PARTIDA</button>
         </div>
 
         <!-- PAINEL SOCIAL -->
@@ -285,7 +283,7 @@
             
             <div class="add-amigo">
                 <input type="text" id="input-add-amigo" placeholder="Adicionar por ID (ex: Joao#123)">
-                <button onclick="adicionarAmigo()">+</button>
+                <button id="btn-add-amigo">+</button>
             </div>
 
             <div class="lista-amigos" id="lista-amigos">
@@ -295,7 +293,7 @@
                         <span class="amigo-nome">Faker#KR1</span>
                         <span class="amigo-status">Online</span>
                     </div>
-                    <button class="btn-convidar" onclick="convidarParaGrupo('Faker#KR1')">Convidar</button>
+                    <button class="btn-convidar" data-nome="Faker#KR1">Convidar</button>
                 </div>
             </div>
         </aside>
@@ -304,86 +302,132 @@
     <!-- CHAT -->
     <footer class="chat-container">
         <div class="chat-mensagens" id="chat-mensagens">
-            <div class="msg-sistema">Bem-vindo ao lobby de Aurore Boreale.</div>
+            <div class="msg-sistema">Conectando ao servidor global...</div>
         </div>
         <div class="chat-input">
-            <input type="text" id="input-chat" placeholder="Digite para a sala..." onkeypress="enviarMensagem(event)">
+            <input type="text" id="input-chat" placeholder="Digite para o chat global...">
         </div>
     </footer>
 
-    <script>
-        // 1. Lógica do Chat
-        function enviarMensagem(event) {
+    <!-- SCRIPT DO SERVIDOR -->
+    <script type="module">
+        import { auth, db } from '../backend/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { ref, push, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        let jogadorAtual = "Convidado";
+
+        // 1. VERIFICAÇÃO DE LOGIN
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Jogador está logado, atualiza a interface
+                jogadorAtual = user.displayName || user.email.split('@')[0];
+                document.getElementById('nome-jogador').innerText = jogadorAtual;
+                document.getElementById('nome-slot').innerText = jogadorAtual;
+                document.getElementById('chat-mensagens').innerHTML += `<div class="msg-sistema">Bem-vindo(a), ${jogadorAtual}! Conectado ao Chat Global.</div>`;
+            } else {
+                // Jogador não está logado, expulsa para a tela de login
+                window.location.href = '../index.html';
+            }
+        });
+
+        // 2. BOTÃO SAIR (LOGOUT)
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = '../index.html';
+            });
+        });
+
+        // 3. CHAT GLOBAL EM TEMPO REAL (Sincronizado via Firebase)
+        const chatInput = document.getElementById('input-chat');
+        const chatBox = document.getElementById('chat-mensagens');
+
+        // Enviar mensagem para o banco de dados
+        chatInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
-                const input = document.getElementById('input-chat');
-                const texto = input.value.trim();
-                
+                const texto = chatInput.value.trim();
                 if (texto !== '') {
-                    const chatBox = document.getElementById('chat-mensagens');
-                    chatBox.innerHTML += `<div class="msg-jogador"><span>Você:</span> ${texto}</div>`;
-                    input.value = '';
-                    chatBox.scrollTop = chatBox.scrollHeight; // Rola o chat para baixo
+                    // Envia pro Firebase na pasta 'lobby/chat'
+                    push(ref(db, 'lobby/chat'), {
+                        nome: jogadorAtual,
+                        texto: texto,
+                        timestamp: serverTimestamp()
+                    });
+                    chatInput.value = '';
                 }
             }
-        }
+        });
 
-        // 2. Adicionar Amigo pelo ID
-        function adicionarAmigo() {
-            const inputAmigo = document.getElementById('input-add-amigo');
-            const idAmigo = inputAmigo.value.trim();
+        // Escutar mensagens chegando do banco de dados (Sincroniza para todos)
+        onChildAdded(ref(db, 'lobby/chat'), (snapshot) => {
+            const data = snapshot.val();
+            // Verifica se a mensagem é sua para destacar a cor
+            if(data.nome === jogadorAtual) {
+                chatBox.innerHTML += `<div class="msg-jogador"><span>Você:</span> ${data.texto}</div>`;
+            } else {
+                chatBox.innerHTML += `<div class="msg-jogador" style="color:#a09b8c"><span>${data.nome}:</span> ${data.texto}</div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
 
+        // 4. INICIAR PARTIDA
+        document.getElementById('btn-jogar').addEventListener('click', () => {
+            window.location.href = '../seleção/select.html';
+        });
+
+        // 5. LÓGICA SOCIAL E GRUPO (Simulação Visual local)
+        const inputAddAmigo = document.getElementById('input-add-amigo');
+        const btnAddAmigo = document.getElementById('btn-add-amigo');
+        const listaAmigos = document.getElementById('lista-amigos');
+        const slotsGrupo = document.getElementById('slots-grupo').children;
+        let slotsOcupados = 1;
+
+        // Adicionar Amigo
+        btnAddAmigo.addEventListener('click', () => {
+            const idAmigo = inputAddAmigo.value.trim();
             if (idAmigo !== '') {
-                const lista = document.getElementById('lista-amigos');
-                lista.innerHTML += `
+                listaAmigos.innerHTML += `
                     <div class="amigo-item">
                         <div class="amigo-info">
                             <span class="amigo-nome">${idAmigo}</span>
                             <span class="amigo-status">Online</span>
                         </div>
-                        <button class="btn-convidar" onclick="convidarParaGrupo('${idAmigo}')">Convidar</button>
+                        <button class="btn-convidar" data-nome="${idAmigo}">Convidar</button>
                     </div>
                 `;
-                inputAmigo.value = '';
-                escreverNoChat('Sistema', `Você adicionou ${idAmigo} à sua lista de amigos.`, true);
+                inputAddAmigo.value = '';
+                chatBox.innerHTML += `<div class="msg-sistema">Você adicionou ${idAmigo}.</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                mapearBotoesConvidar(); // Atualiza os botões novos
             }
+        });
+
+        // Convidar para o Grupo
+        function mapearBotoesConvidar() {
+            document.querySelectorAll('.btn-convidar').forEach(btn => {
+                // Remove o evento antigo para não duplicar, clona o botão
+                const novoBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(novoBtn, btn);
+
+                novoBtn.addEventListener('click', (e) => {
+                    const nomeAmigo = e.target.getAttribute('data-nome');
+                    if (slotsOcupados < 5) {
+                        slotsGrupo[slotsOcupados].classList.add('ocupado');
+                        slotsGrupo[slotsOcupados].innerHTML = `
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #463714; margin-bottom: 10px;"></div>
+                            ${nomeAmigo.split('#')[0]}
+                        `;
+                        slotsOcupados++;
+                        chatBox.innerHTML += `<div class="msg-sistema">${nomeAmigo} entrou na sala.</div>`;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    } else {
+                        alert("A sala está cheia!");
+                    }
+                });
+            });
         }
+        mapearBotoesConvidar(); // Chama ao carregar a tela
 
-        // 3. Convidar Amigo para a Sala (Simulação Visual)
-        let slotsOcupados = 1; // Você já ocupa o slot 1
-
-        function convidarParaGrupo(nomeAmigo) {
-            const slots = document.getElementById('slots-grupo').children;
-
-            if (slotsOcupados < 5) {
-                slots[slotsOcupados].classList.add('ocupado');
-                slots[slotsOcupados].innerHTML = `
-                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #463714; margin-bottom: 10px;"></div>
-                    ${nomeAmigo.split('#')[0]}
-                `;
-                slotsOcupados++;
-                escreverNoChat('Sistema', `${nomeAmigo} entrou na sala.`, true);
-            } else {
-                alert("A sala está cheia! (Máximo de 5 jogadores)");
-            }
-        }
-
-        // Função auxiliar do chat
-        function escreverNoChat(remetente, mensagem, isSistema = false) {
-            const chatBox = document.getElementById('chat-mensagens');
-            if (isSistema) {
-                chatBox.innerHTML += `<div class="msg-sistema">${mensagem}</div>`;
-            } else {
-                chatBox.innerHTML += `<div class="msg-jogador"><span>${remetente}:</span> ${mensagem}</div>`;
-            }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        // 4. Iniciar Partida (Transição de Tela)
-        function iniciarPartida() {
-            // O comando 'window.location.href' redireciona o usuário para outra página.
-            // Aqui, ele sai da pasta 'client', entra em 'seleção' e abre 'select.html'
-            window.location.href = '../seleção/select.html';
-        }
     </script>
 </body>
 </html>
