@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleção de Campeões - Aurore Boreale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos base (Tema League of Legends Clássico) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0c;
+            background-image: radial-gradient(circle at center, #0a1428 0%, #09090b 100%);
+            font-family: 'Roboto', sans-serif;
+            color: #c8aa6e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            text-align: center;
+            color: #f0e6d2;
+            text-shadow: 0 0 10px rgba(200, 170, 110, 0.5);
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 2.5rem; letter-spacing: 3px; }
+
+        /* Layout Principal */
+        .container-principal {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Área de Seleção (Esquerda) */
+        .selecao {
+            flex: 1;
+            background: rgba(1, 10, 19, 0.85);
+            border: 1px solid #785a28;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lista-campeoes {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .campeao-icone {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #463714;
+            cursor: pointer;
+            transition: 0.3s;
+            background-size: cover;
+            background-position: center;
+            background-color: #1e2328; /* Fundo fallback */
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .campeao-icone:hover, .campeao-icone.ativo {
+            border-color: #c8aa6e;
+            box-shadow: 0 0 15px rgba(200, 170, 110, 0.8);
+            transform: translateY(-5px);
+        }
+
+        .campeao-icone span {
+            background: rgba(0,0,0,0.7);
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 2px 0;
+        }
+
+        button.selecionar {
+            background: linear-gradient(to bottom, #1e2328, #0a0a0c);
+            border: 2px solid #c8aa6e;
+            color: #f0e6d2;
+            padding: 15px 40px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        button.selecionar:hover {
+            background: linear-gradient(to bottom, #2b3137, #1e2328);
+            box-shadow: 0 0 15px rgba(200, 170, 110, 0.8);
+        }
+
+        /* Área de Descrição (Direita) */
+        .menu_descricao_personagem {
+            flex: 2;
+            background: rgba(1, 10, 19, 0.85);
+            border: 1px solid #785a28;
+            padding: 20px;
+            display: none; /* Escondido até selecionar um campeão */
+        }
+
+        .lore {
+            font-style: italic;
+            color: #a09b8c;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #463714;
+            padding-bottom: 10px;
+        }
+
+        /* Habilidades */
+        .habilits {
+            margin-top: 15px;
+        }
+
+        .icones-habilidades {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .skill-icone {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #463714;
+            background-color: #1e2328;
+            background-size: cover;
+			background-position: center; /* ADICIONE ISSO */
+			background-repeat: no-repeat; /* ADICIONE ISSO */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #5c5b57;
+            transition: 0.2s;
+        }
+
+        .skill-icone:hover {
+            border-color: #c8aa6e;
+        }
+
+        .descricao-skill {
+            background: #010a13;
+            border: 1px solid #463714;
+            padding: 10px;
+            min-height: 60px;
+            color: #f0e6d2;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* Atributos */
+        .atributos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            background: #050b14;
+            padding: 15px;
+            border: 1px solid #463714;
+        }
+
+        .atributos nav {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .atributos p {
+            font-size: 0.85rem;
+            color: #a09b8c;
+            margin-bottom: 5px;
+        }
+
+        .atributos p span {
+            color: #f0e6d2;
+            font-weight: bold;
+        }
+
+        /* Runas */
+        .runas {
+            margin-top: 30px;
+            border-top: 1px solid #463714;
+            padding-top: 15px;
+        }
+
+        .menu_runas {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .runa {
+            text-align: center;
+            cursor: pointer;
+            width: 30%;
+            transition: 0.3s;
+            padding: 10px;
+            border: 1px solid transparent;
+        }
+
+        .runa.ativa {
+            border: 1px solid #c8aa6e;
+            background: rgba(200, 170, 110, 0.1);
+            border-radius: 5px;
+        }
+
+        .runa-icone {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #463714;
+            margin: 0 auto 10px auto;
+            background-color: #1e2328;
+            background-size: cover;
+        }
+
+        .runa.ativa .runa-icone {
+            border-color: #c8aa6e;
+            box-shadow: 0 0 10px #c8aa6e;
+        }
+
+        .runa-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: #f0e6d2;
+        }
+
+        .runa-desc {
+            font-size: 0.75rem;
+            color: #a09b8c;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ESCOLHA SEU CAMPEÃO</h1>
+
+    <div class="container-principal">
+        <!-- ÁREA ESQUERDA: LISTA DE CAMPEÕES -->
+        <div class="selecao">
+            <div class="lista-campeoes" id="lista-campeoes">
+                <!-- Os ícones serão injetados aqui pelo JS -->
+            </div>
+            <button class="selecionar" id="btn-confirmar">Confirmar</button>
+        </div>
+
+        <!-- ÁREA DIREITA: DETALHES DO CAMPEÃO E RUNAS -->
+        <div class="menu_descricao_personagem" id="painel-detalhes">
+            <header>
+                <h3 id="nome-campeao">Nome</h3>
+                <h3 style="font-size: 1rem; color: #a09b8c;" id="classe-campeao">Classe</h3>
+                
+                <div class="lore" id="lore-campeao">
+                    Lore do personagem vai aqui...
+                </div>
+
+                <!-- HABILIDADES -->
+                <article class="habilits">
+                    <h3 style="font-size: 1rem; text-align: left;">Habilidades</h3>
+                    <div class="icones-habilidades">
+                        <div class="skill-icone" id="icone-p" onmouseover="mostrarSkill('p')">P</div>
+                        <div class="skill-icone" id="icone-q" onmouseover="mostrarSkill('q')">Q</div>
+                        <div class="skill-icone" id="icone-w" onmouseover="mostrarSkill('w')">W</div>
+                        <div class="skill-icone" id="icone-e" onmouseover="mostrarSkill('e')">E</div>
+                        <div class="skill-icone" id="icone-r" onmouseover="mostrarSkill('r')">R</div>
+                    </div>
+
+                    <!-- CONTAINER PARA HABILIDADES SECUNDÁRIAS (EXCLUSIVO LITLEGOT) -->
+                    <div id="habilidades-secundarias" style="display: none; border-top: 1px dashed #463714; padding-top: 10px;">
+                        <!-- Injetado via JS -->
+                    </div>
+
+                    <div class="descricao-skill" id="descricao-skill">
+                        Passe o mouse sobre uma habilidade para ver a descrição.
+                    </div>
+                </article>
+
+                <!-- ATRIBUTOS -->
+                <article class="atributos">
+                    <nav class="ataques">
+                        <p>Ataque Físico (AD): <span id="attr-ad">0</span></p>
+                        <p>Ataque Mágico (AP): <span id="attr-ap">0</span></p>
+                    </nav>
+                    <nav class="defesas">
+                        <p>Defesa Física (DF): <span id="attr-df">0</span></p>
+                        <p>Defesa Mágica (DM): <span id="attr-dm">0</span></p>
+                        <p>Vida Máxima (VM): <span id="attr-vm">0</span></p>
+                    </nav>
+                    <nav class="velocidades">
+                        <p>Vel. de Ataque (VdA): <span id="attr-vda">0%</span></p>
+                        <p>Vel. de Movimento (VdM): <span id="attr-vdm">0</span></p>
+                        <p>Acel. Habilidades (AH): <span id="attr-ah">0</span></p>
+                    </nav>
+                    <nav class="vampirismos">
+                        <p>Vamp. Físico (VF): <span id="attr-vf">0%</span></p>
+                        <p>Vamp. Mágico (VMg): <span id="attr-vmg">0%</span></p>
+                        <p>Vamp. Universal (VU): <span id="attr-vu">0%</span></p>
+                    </nav>
+                </article>
+            </header>
+
+            <!-- RUNAS -->
+            <div class="runas">
+                <h3 style="font-size: 1rem;">Escolha sua Runa</h3>
+                <nav class="menu_runas" id="lista-runas">
+                    <!-- Runas injetadas via JS -->
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           BANCO DE DADOS
+           ========================================= */
+        const dadosCampeoes = {
+            litlegot: {
+                nome: "Litlegot",
+                classe: "Mago",
+                icone: "icones/personagens/litlegot.jpeg", 
+                lore: "Não me culpe pelos seus erros, é seu dever enfrentá-los.",
+                atributos: { ad: 45, ap: 15, df: 25, dm: 30, vm: 520, vda: "0.625", vdm: "330", ah: "0", vf: "0%", vmg: "0%", vu: "0%" },
+                skills: {
+                    p: { nome: "Gênesis", desc: "O usuário permite que os aliados comprem itens fora da base.", img: "icones/habilidades/litlegot/passiva.png" },
+                    q: { nome: "Ódio", desc: "Permite desenhar sobre o mapa com o mouse usando fogo puro. Dá dano contínuo por 4s (10% de dano base na vida máxima).", img: "icones/habilidades/litlegot/1_hab.jpg" },
+                    w: { nome: "Empatia", desc: "Desenha água no chão que concede cura e escudo aos aliados e lentidão aos inimigos (baseado no AP atual).", img: "icones/habilidades/litlegot/2_hab.jpg" },
+                    e: { nome: "Felicidade", desc: "Desenha luz no mapa, cegando inimigos, os enraizando no chão e concedendo visão aos aliados.", img: "icones/habilidades/litlegot/3_hab.jpg" },
+                    r: { nome: "Paixão", desc: "Pega as duas últimas tintas usadas para mudar totalmente Q, W, E para cores secundárias (Laranja, Verde, Roxo).", img: "icones/habilidades/litlegot/R_hab.jpg" },
+                    
+                    /* SECUNDÁRIAS (Efeitos únicos com nomes de emoções) */
+                    secundarias: {
+                        laranja: { // Fogo + Luz
+                            q: { nome: "Ansiedade", desc: "Aumenta a velocidade de movimento do aliado drasticamente, mas drena vida continuamente enquanto o efeito durar.", img: "icones/habilidades/litlegot/orange_q.jpg" },
+                            w: { nome: "Euforia", desc: "Dispara projéteis rápidos que explodem em área, causando dano adaptativo.", img: "icones/habilidades/litlegot/orange_w.jpg" },
+                            e: { nome: "Coragem", desc: "Cria um escudo ardente em área que reflete todo o dano recebido aos atacantes por 3 segundos.", img: "icones/habilidades/litlegot/orange_e.jpg" }
+                        },
+                        verde: { // Água + Luz
+                            q: { nome: "Inveja", desc: "Rouba temporariamente os atributos de defesa física e mágica do inimigo alvo e os transfere para Litlegot.", img: "icones/habilidades/litlegot/green_q.jpg" },
+                            w: { nome: "Esperança", desc: "Cria uma zona radiante massiva que cura aliados gradualmente e revive as tropas abatidas próximas.", img: "icones/habilidades/litlegot/green_w.jpg" },
+                            e: { nome: "Nojo", desc: "Lança uma poça tóxica que enraíza os inimigos no local e aplica dano contínuo baseado na vida perdida deles.", img: "icones/habilidades/litlegot/green_e.jpg" }
+                        },
+                        roxo: { // Fogo + Água
+                            q: { nome: "Melancolia", desc: "Gera uma névoa densa que reduz severamente o campo de visão dos inimigos atingidos e aplica uma lentidão incapacitante.", img: "icones/habilidades/litlegot/purple_q.jpg" },
+                            w: { nome: "Medo", desc: "Aterroriza os inimigos em formato de cone, forçando-os a fugir na direção oposta enquanto perdem resistência mágica.", img: "icones/habilidades/litlegot/purple_w.jpg" },
+                            e: { nome: "Saudade", desc: "Puxa violentamente os inimigos distantes para o centro de uma área marcada, causando dano em explosão ao se colidirem.", img: "icones/habilidades/litlegot/purple_e.jpg" }
+                        }
+                    }
+                }
+            },
+            abrax: {
+                nome: "Abrax",
+                classe: "Lutador / AD",
+                icone: "icones/personagens/abrax.jpeg",
+                lore: "Mostre-me o que podes fazer e eu provavelmente farei melhor.",
+                atributos: { ad: 65, ap: 0, df: 35, dm: 32, vm: 600, vda: "0.650", vdm: "345", ah: "0", vf: "5%", vmg: "0%", vu: "0%" },
+                skills: {
+                    p: { nome: "A falácia do Apostador", desc: "O usuário ganha mais vampirismo conforme sua chance de acerto crítico aumenta.", img: "icones/habilidades/abrax/passiva.jpg" },
+                    q: { nome: "Mascarada dos Tolos", desc: "Abre o inventário de habilidades. Q, W e E viram as últimas habilidades roubadas de aliados ou inimigos. O R cancela a ação.", img: "icones/habilidades/abrax/1_hab.jpg" },
+                    w: { nome: "Honestamente?", desc: "Um avanço rápido (Dash) na direção do cursor.", img: "icones/habilidades/abrax/2_hab.jpg" },
+                    e: { nome: "Sobrecarregada", desc: "Um empurrão poderoso que atordoa os inimigos atingidos.", img: "icones/habilidades/abrax/3_hab.jpg" },
+                    r: { nome: "No limite", desc: "Passivo: Quanto menor a vida de Abrax, maiores ficam seus atributos (Dano, Defesas e Velocidade). Ao ficar à beira da morte, seus status alcançam níveis absurdos e imundos, tornando-a quase imparável.", img: "icones/habilidades/abrax/r_hab.jpg" }
+                }
+            },
+            psique: {
+                nome: "Psique",
+                classe: "Lutador / Mago",
+                icone: "icones/personagens/psique.jpeg",
+                lore: "Venha abraçar a liberdade que só eu posso lhe dar",
+                atributos: { ad: 55, ap: 10, df: 30, dm: 30, vm: 580, vda: "0.635", vdm: "340", ah: "0", vf: "0%", vmg: "0%", vu: "5%" },
+                skills: {
+                    p: { nome: "Parasita Espiritual", desc: "Rouba atributos, vida e mana dos inimigos ao acertar suas habilidades neles.", img: "icones/habilidades/psique/passiva.jpg" },
+                    q: { nome: "Marca Vital", desc: "Ao marcar um alvo com ataque básico, causar dano a ele cura Psique com base na chance de crítico atual.", img: "icones/habilidades/psique/1_hab.jpg" },
+                    w: { nome: "Passo Fantasma", desc: "Dá um Dash e fica invisível até usar alguma habilidade ou atacar.", img: "icones/habilidades/psique/2_hab.jpg" },
+                    e: { nome: "Enxame de Memórias", desc: "Cria borboletas que coletam as últimas habilidades usadas pelos heróis para ela ou um aliado usar.", img: "icones/habilidades/psique/3_hab.jpg" },
+                    r: { nome: "Domínio Sombrio", desc: "Cria uma área ao redor que cura Psique constantemente enquanto causa dano aos inimigos dentro dela.", img: "icones/habilidades/psique/r_hab.jpg" }
+                }
+            }
+        };
+
+        const dadosRunas = [
+            { id: "runa1", nome: "Até o Último Suspiro", desc: "Aumenta a vida máxima conforme ela fica baixa (escalonamento de risco).", icone: "icones/runas/ultimo_suspiro.jpg" },
+            { id: "runa2", nome: "Desejo de Guerra", desc: "Aumenta sua defesa máxima com base no seu ataque (AD) atual.", icone: "icones/runas/desejo_guerra.jpg" },
+            { id: "runa3", nome: "Gimmi", desc: "Itens mais baratos, mas cobra juros no próximo item diminuindo curas e escudos recebidos.", icone: "icones/runas/gimmi.jpg" }
+        ];
+
+        /* =========================================
+           LÓGICA DO SISTEMA
+           ========================================= */
+        let campeaoSelecionado = null;
+        let runaSelecionada = null;
+
+        // Renderizar Lista de Campeões
+        const listaCampeoesDiv = document.getElementById('lista-campeoes');
+        for (const key in dadosCampeoes) {
+            const camp = dadosCampeoes[key];
+            const div = document.createElement('div');
+            div.className = 'campeao-icone';
+            
+            if(camp.icone && camp.icone !== "") {
+                div.style.backgroundImage = `url('${camp.icone}')`;
+            }
+            div.innerHTML = `<span>${camp.nome}</span>`;
+            
+            div.onclick = () => selecionarCampeao(key, div);
+            listaCampeoesDiv.appendChild(div);
+        }
+
+        // Renderizar Lista de Runas
+        const listaRunasDiv = document.getElementById('lista-runas');
+        dadosRunas.forEach(runa => {
+            const div = document.createElement('div');
+            div.className = 'runa';
+            div.onclick = () => selecionarRuna(runa.id, div);
+            
+            div.innerHTML = `
+                <div class="runa-icone" style="background-image: ${runa.icone !== '' ? `url('${runa.icone}')` : 'none'}"></div>
+                <div class="runa-titulo">${runa.nome}</div>
+                <div class="runa-desc">${runa.desc}</div>
+            `;
+            listaRunasDiv.appendChild(div);
+        });
+
+        // Função ao clicar num campeão
+        function selecionarCampeao(key, elementoHtml) {
+            campeaoSelecionado = dadosCampeoes[key];
+            
+            document.querySelectorAll('.campeao-icone').forEach(el => el.classList.remove('ativo'));
+            elementoHtml.classList.add('ativo');
+            
+            document.getElementById('painel-detalhes').style.display = 'block';
+
+            document.getElementById('nome-campeao').innerText = campeaoSelecionado.nome;
+            document.getElementById('classe-campeao').innerText = campeaoSelecionado.classe;
+            document.getElementById('lore-campeao').innerText = campeaoSelecionado.lore;
+
+            const attr = campeaoSelecionado.atributos;
+            document.getElementById('attr-ad').innerText = attr.ad;
+            document.getElementById('attr-ap').innerText = attr.ap;
+            document.getElementById('attr-df').innerText = attr.df;
+            document.getElementById('attr-dm').innerText = attr.dm;
+            document.getElementById('attr-vm').innerText = attr.vm;
+            document.getElementById('attr-vda').innerText = attr.vda;
+            document.getElementById('attr-vdm').innerText = attr.vdm;
+            document.getElementById('attr-ah').innerText = attr.ah;
+            document.getElementById('attr-vf').innerText = attr.vf;
+            document.getElementById('attr-vmg').innerText = attr.vmg;
+            document.getElementById('attr-vu').innerText = attr.vu;
+
+            // Carregar habilidades principais
+            ['p', 'q', 'w', 'e', 'r'].forEach(tecla => {
+                const imgSkill = campeaoSelecionado.skills[tecla].img;
+                const btnSkill = document.getElementById(`icone-${tecla}`);
+                
+                if(imgSkill && imgSkill !== "") {
+                    btnSkill.style.backgroundImage = `url('${imgSkill}')`;
+                    btnSkill.innerText = "";
+                } else {
+                    btnSkill.style.backgroundImage = "none";
+                    btnSkill.innerText = tecla.toUpperCase();
+                }
+            });
+
+            // Gerar Habilidades Secundárias se o campeão tiver (ex: Litlegot)
+            const secContainer = document.getElementById('habilidades-secundarias');
+            secContainer.innerHTML = '';
+            
+            if (campeaoSelecionado.skills.secundarias) {
+                secContainer.style.display = 'block';
+                
+                for (const cor in campeaoSelecionado.skills.secundarias) {
+                    let nomeCor = cor.charAt(0).toUpperCase() + cor.slice(1);
+                    // Definindo as cores hexadecimais para as bordas das skills
+                    let colorCode = cor === 'laranja' ? '#ff9900' : (cor === 'verde' ? '#33cc33' : '#9933cc');
+                    
+                    let htmlSecundaria = `
+                    <div style="margin-bottom: 10px;">
+                        <h4 style="font-size: 0.85rem; color: ${colorCode}; text-align: left; margin-bottom: 5px;">Forma Secundária: ${nomeCor}</h4>
+                        <div class="icones-habilidades">`;
+                    
+                    ['q', 'w', 'e'].forEach(tecla => {
+                        const skillSec = campeaoSelecionado.skills.secundarias[cor][tecla];
+                        const temImg = skillSec.img && skillSec.img !== "";
+                        const bgStyle = temImg ? `background-image: url('${skillSec.img}'); color: transparent;` : "";
+                        
+                        htmlSecundaria += `
+                            <div class="skill-icone" 
+                                 style="border-color: ${colorCode}; ${bgStyle}" 
+                                 onmouseover="mostrarSkillSecundaria('${cor}', '${tecla}')">
+                                 ${tecla.toUpperCase()}
+                            </div>`;
+                    });
+                    
+                    htmlSecundaria += `</div></div>`;
+                    secContainer.innerHTML += htmlSecundaria;
+                }
+            } else {
+                secContainer.style.display = 'none';
+            }
+
+            document.getElementById('descricao-skill').innerHTML = "Passe o mouse sobre uma habilidade para ver a descrição.";
+        }
+
+        // Mostrar habilidade principal no hover
+        function mostrarSkill(tecla) {
+            if(!campeaoSelecionado) return;
+            const skill = campeaoSelecionado.skills[tecla];
+            document.getElementById('descricao-skill').innerHTML = `
+                <strong style="color:#c8aa6e;">[${tecla.toUpperCase()}] ${skill.nome}</strong><br><br>
+                ${skill.desc}
+            `;
+        }
+
+        // Mostrar habilidade secundária no hover
+        function mostrarSkillSecundaria(cor, tecla) {
+            if(!campeaoSelecionado || !campeaoSelecionado.skills.secundarias) return;
+            const skill = campeaoSelecionado.skills.secundarias[cor][tecla];
+            let colorCode = cor === 'laranja' ? '#ff9900' : (cor === 'verde' ? '#33cc33' : '#9933cc');
+            
+            document.getElementById('descricao-skill').innerHTML = `
+                <strong style="color:${colorCode};">[${tecla.toUpperCase()} - FORMA ${cor.toUpperCase()}] ${skill.nome}</strong><br><br>
+                ${skill.desc}
+            `;
+        }
+
+        // Selecionar Runa
+        function selecionarRuna(id, elementoHtml) {
+            runaSelecionada = id;
+            document.querySelectorAll('.runa').forEach(el => el.classList.remove('ativa'));
+            elementoHtml.classList.add('ativa');
+        }
+
+        // Botão Confirmar
+        document.getElementById('btn-confirmar').onclick = () => {
+            if(!campeaoSelecionado) {
+                alert("Por favor, selecione um campeão primeiro!");
+                return;
+            }
+            if(!runaSelecionada) {
+                alert("Não esqueça de selecionar sua Runa!");
+                return;
+            }
+            alert(`Sua partida vai começar!\nCampeão: ${campeaoSelecionado.nome}\nRuna Escolhida: ${dadosRunas.find(r => r.id === runaSelecionada).nome}`);
+        };
+    </script>
+</body>
+</html>
