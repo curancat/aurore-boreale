@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seleção de Campeões - Aurore Boreale</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Socket.io Client -->
+    <script src="/socket.io/socket.io.js"></script>
     <style>
-        /* Estilos base (Tema League of Legends Clássico) */
         * {
             margin: 0;
             padding: 0;
@@ -31,10 +32,105 @@
             text-align: center;
             color: #f0e6d2;
             text-shadow: 0 0 10px rgba(200, 170, 110, 0.5);
+        }
+
+        h1 { font-size: 2.2rem; letter-spacing: 2px; }
+
+        /* HUD Superior: Temporizador e Fase */
+        .painel-hud {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(1, 10, 19, 0.9);
+            border: 1px solid #785a28;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+
+        .fase-status {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: #f0e6d2;
+        }
+
+        .timer-box {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff4655;
+            text-shadow: 0 0 10px rgba(255, 70, 85, 0.6);
+            border: 2px solid #785a28;
+            padding: 5px 25px;
+            border-radius: 4px;
+            background: #050b14;
+        }
+
+        .rota-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rota-selector select {
+            background: #050b14;
+            border: 1px solid #c8aa6e;
+            color: #f0e6d2;
+            padding: 8px 12px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* Área de Jogadores da Sala */
+        .jogadores-grid {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
             margin-bottom: 20px;
         }
 
-        h1 { font-size: 2.5rem; letter-spacing: 3px; }
+        .card-jogador {
+            background: rgba(5, 11, 20, 0.9);
+            border: 1px solid #463714;
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            transition: border-color 0.3s;
+        }
+
+        .card-jogador.conectado { border-color: #c8aa6e; }
+        .card-jogador.confirmado { border-color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
+
+        .card-jogador .nick {
+            font-size: 0.85rem;
+            color: #f0e6d2;
+            font-weight: bold;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-jogador .rota-tag {
+            font-size: 0.75rem;
+            color: #a09b8c;
+            margin-bottom: 8px;
+        }
+
+        .card-jogador .avatar-pick {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            border: 2px solid #463714;
+            background-size: cover;
+            background-position: center;
+            background-color: #1e2328;
+        }
 
         /* Layout Principal */
         .container-principal {
@@ -56,58 +152,130 @@
             align-items: center;
         }
 
+        .painel-banimentos {
+            width: 100%;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #463714;
+            padding-bottom: 10px;
+        }
+
+        .lista-bans {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 5px;
+        }
+
+        .ban-slot {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ff4655;
+            background-size: cover;
+            background-position: center;
+            background-color: #1e2328;
+            opacity: 0.6;
+            position: relative;
+        }
+
+        .ban-slot::after {
+            content: "✕";
+            color: #ff4655;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
         .lista-campeoes {
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
         }
 
         .campeao-icone {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border: 2px solid #463714;
             cursor: pointer;
             transition: 0.3s;
             background-size: cover;
             background-position: center;
-            background-color: #1e2328; /* Fundo fallback */
+            background-color: #1e2328;
             display: flex;
             align-items: flex-end;
             justify-content: center;
+            position: relative;
         }
 
         .campeao-icone:hover, .campeao-icone.ativo {
             border-color: #c8aa6e;
             box-shadow: 0 0 15px rgba(200, 170, 110, 0.8);
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+        }
+
+        .campeao-icone.banido {
+            opacity: 0.3;
+            filter: grayscale(100%);
+            cursor: not-allowed;
+            border-color: #ff4655;
         }
 
         .campeao-icone span {
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             width: 100%;
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
             padding: 2px 0;
         }
 
-        button.selecionar {
+        .acoes-btn {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        button.btn-acao {
+            flex: 1;
             background: linear-gradient(to bottom, #1e2328, #0a0a0c);
             border: 2px solid #c8aa6e;
             color: #f0e6d2;
-            padding: 15px 40px;
+            padding: 12px 20px;
             font-family: 'Cinzel', serif;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: auto;
         }
 
-        button.selecionar:hover {
+        button.btn-acao:hover:not(:disabled) {
             background: linear-gradient(to bottom, #2b3137, #1e2328);
             box-shadow: 0 0 15px rgba(200, 170, 110, 0.8);
+        }
+
+        button.btn-ban {
+            border-color: #ff4655;
+            color: #ff4655;
+        }
+
+        button.btn-ban:hover:not(:disabled) {
+            box-shadow: 0 0 15px rgba(255, 70, 85, 0.8);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #463714;
+            color: #5c5b57;
         }
 
         /* Área de Descrição (Direita) */
@@ -116,7 +284,7 @@
             background: rgba(1, 10, 19, 0.85);
             border: 1px solid #785a28;
             padding: 20px;
-            display: none; /* Escondido até selecionar um campeão */
+            display: none;
         }
 
         .lore {
@@ -127,10 +295,7 @@
             padding-bottom: 10px;
         }
 
-        /* Habilidades */
-        .habilits {
-            margin-top: 15px;
-        }
+        .habilits { margin-top: 15px; }
 
         .icones-habilidades {
             display: flex;
@@ -144,8 +309,8 @@
             border: 1px solid #463714;
             background-color: #1e2328;
             background-size: cover;
-			background-position: center; /* ADICIONE ISSO */
-			background-repeat: no-repeat; /* ADICIONE ISSO */
+            background-position: center;
+            background-repeat: no-repeat;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -155,9 +320,7 @@
             transition: 0.2s;
         }
 
-        .skill-icone:hover {
-            border-color: #c8aa6e;
-        }
+        .skill-icone:hover { border-color: #c8aa6e; }
 
         .descricao-skill {
             background: #010a13;
@@ -169,7 +332,6 @@
             margin-top: 10px;
         }
 
-        /* Atributos */
         .atributos {
             display: flex;
             flex-wrap: wrap;
@@ -180,23 +342,10 @@
             border: 1px solid #463714;
         }
 
-        .atributos nav {
-            flex: 1;
-            min-width: 120px;
-        }
+        .atributos nav { flex: 1; min-width: 120px; }
+        .atributos p { font-size: 0.85rem; color: #a09b8c; margin-bottom: 5px; }
+        .atributos p span { color: #f0e6d2; font-weight: bold; }
 
-        .atributos p {
-            font-size: 0.85rem;
-            color: #a09b8c;
-            margin-bottom: 5px;
-        }
-
-        .atributos p span {
-            color: #f0e6d2;
-            font-weight: bold;
-        }
-
-        /* Runas */
         .runas {
             margin-top: 30px;
             border-top: 1px solid #463714;
@@ -239,30 +388,53 @@
             box-shadow: 0 0 10px #c8aa6e;
         }
 
-        .runa-titulo {
-            font-family: 'Cinzel', serif;
-            font-size: 0.9rem;
-            color: #f0e6d2;
-        }
-
-        .runa-desc {
-            font-size: 0.75rem;
-            color: #a09b8c;
-            margin-top: 5px;
-        }
+        .runa-titulo { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #f0e6d2; }
+        .runa-desc { font-size: 0.75rem; color: #a09b8c; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>ESCOLHA SEU CAMPEÃO</h1>
+    <h1>Aurore Boreale - Seleção de Campeões</h1>
+
+    <!-- BARRA HUD DE TEMPO E ROTAS -->
+    <div class="painel-hud">
+        <div class="fase-status" id="texto-fase">FASE DE BANIMENTO</div>
+        <div class="timer-box" id="timer-display">30</div>
+        <div class="rota-selector">
+            <label for="select-rota">Sua Rota:</label>
+            <select id="select-rota" onchange="alterarRota(this.value)">
+                <option value="Líder">Líder (Top Lane)</option>
+                <option value="Mid">Mid (Meio do Mapa)</option>
+                <option value="Suporte de Precisão">Suporte de Precisão (Todas as Lanes)</option>
+                <option value="Suporte Cobertura">Suporte Cobertura (Acompanha Atacante)</option>
+                <option value="Atacante">Atacante (ADC)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- CARDS DE TODOS OS JOGADORES NA SALA -->
+    <div class="jogadores-grid" id="jogadores-grid">
+        <!-- Injetado via WebSocket dinamicamente -->
+    </div>
 
     <div class="container-principal">
-        <!-- ÁREA ESQUERDA: LISTA DE CAMPEÕES -->
+        <!-- ÁREA ESQUERDA: LISTA DE CAMPEÕES E BANIMENTOS -->
         <div class="selecao">
-            <div class="lista-campeoes" id="lista-campeoes">
-                <!-- Os ícones serão injetados aqui pelo JS -->
+            <div class="painel-banimentos">
+                <h3 style="font-size: 0.85rem; color: #ff4655;">Campeões Banidos</h3>
+                <div class="lista-bans" id="lista-bans">
+                    <!-- Ícones banidos entram aqui -->
+                </div>
             </div>
-            <button class="selecionar" id="btn-confirmar">Confirmar</button>
+
+            <div class="lista-campeoes" id="lista-campeoes">
+                <!-- Os ícones serão injetados pelo JS -->
+            </div>
+
+            <div class="acoes-btn">
+                <button class="btn-acao btn-ban" id="btn-banir" onclick="banirCampeao()">Banir</button>
+                <button class="btn-acao" id="btn-confirmar" onclick="confirmarEscolha()">Confirmar Pick</button>
+            </div>
         </div>
 
         <!-- ÁREA DIREITA: DETALHES DO CAMPEÃO E RUNAS -->
@@ -286,10 +458,8 @@
                         <div class="skill-icone" id="icone-r" onmouseover="mostrarSkill('r')">R</div>
                     </div>
 
-                    <!-- CONTAINER PARA HABILIDADES SECUNDÁRIAS (EXCLUSIVO LITLEGOT) -->
-                    <div id="habilidades-secundarias" style="display: none; border-top: 1px dashed #463714; padding-top: 10px;">
-                        <!-- Injetado via JS -->
-                    </div>
+                    <!-- CONTAINER PARA HABILIDADES SECUNDÁRIAS -->
+                    <div id="habilidades-secundarias" style="display: none; border-top: 1px dashed #463714; padding-top: 10px;"></div>
 
                     <div class="descricao-skill" id="descricao-skill">
                         Passe o mouse sobre uma habilidade para ver a descrição.
@@ -332,7 +502,12 @@
 
     <script>
         /* =========================================
-           BANCO DE DADOS
+           CONEXÃO SOCKET.IO
+           ========================================= */
+        const socket = io();
+
+        /* =========================================
+           BANCO DE DADOS LOCAL
            ========================================= */
         const dadosCampeoes = {
             litlegot: {
@@ -347,23 +522,21 @@
                     w: { nome: "Empatia", desc: "Desenha água no chão que concede cura e escudo aos aliados e lentidão aos inimigos (baseado no AP atual).", img: "icones/habilidades/litlegot/2_hab.jpg" },
                     e: { nome: "Felicidade", desc: "Desenha luz no mapa, cegando inimigos, os enraizando no chão e concedendo visão aos aliados.", img: "icones/habilidades/litlegot/3_hab.jpg" },
                     r: { nome: "Paixão", desc: "Pega as duas últimas tintas usadas para mudar totalmente Q, W, E para cores secundárias (Laranja, Verde, Roxo).", img: "icones/habilidades/litlegot/R_hab.jpg" },
-                    
-                    /* SECUNDÁRIAS (Efeitos únicos com nomes de emoções) */
                     secundarias: {
-                        laranja: { // Fogo + Luz
-                            q: { nome: "Ansiedade", desc: "Aumenta a velocidade de movimento do aliado drasticamente, mas drena vida continuamente enquanto o efeito durar.", img: "icones/habilidades/litlegot/orange_q.jpg" },
+                        laranja: {
+                            q: { nome: "Ansiedade", desc: "Aumenta a velocidade de movimento do aliado drasticamente, mas drena vida continuamente.", img: "icones/habilidades/litlegot/orange_q.jpg" },
                             w: { nome: "Euforia", desc: "Dispara projéteis rápidos que explodem em área, causando dano adaptativo.", img: "icones/habilidades/litlegot/orange_w.jpg" },
-                            e: { nome: "Coragem", desc: "Cria um escudo ardente em área que reflete todo o dano recebido aos atacantes por 3 segundos.", img: "icones/habilidades/litlegot/orange_e.jpg" }
+                            e: { nome: "Coragem", desc: "Cria um escudo ardente em área que reflete todo o dano recebido aos atacantes por 3s.", img: "icones/habilidades/litlegot/orange_e.jpg" }
                         },
-                        verde: { // Água + Luz
-                            q: { nome: "Inveja", desc: "Rouba temporariamente os atributos de defesa física e mágica do inimigo alvo e os transfere para Litlegot.", img: "icones/habilidades/litlegot/green_q.jpg" },
-                            w: { nome: "Esperança", desc: "Cria uma zona radiante massiva que cura aliados gradualmente e revive as tropas abatidas próximas.", img: "icones/habilidades/litlegot/green_w.jpg" },
-                            e: { nome: "Nojo", desc: "Lança uma poça tóxica que enraíza os inimigos no local e aplica dano contínuo baseado na vida perdida deles.", img: "icones/habilidades/litlegot/green_e.jpg" }
+                        verde: {
+                            q: { nome: "Inveja", desc: "Rouba temporariamente os atributos de defesa do inimigo e transfere para Litlegot.", img: "icones/habilidades/litlegot/green_q.jpg" },
+                            w: { nome: "Esperança", desc: "Cria uma zona radiante massiva que cura aliados gradualmente e revive tropas abatidas.", img: "icones/habilidades/litlegot/green_w.jpg" },
+                            e: { nome: "Nojo", desc: "Lança uma poça tóxica que enraíza inimigos e aplica dano contínuo.", img: "icones/habilidades/litlegot/green_e.jpg" }
                         },
-                        roxo: { // Fogo + Água
-                            q: { nome: "Melancolia", desc: "Gera uma névoa densa que reduz severamente o campo de visão dos inimigos atingidos e aplica uma lentidão incapacitante.", img: "icones/habilidades/litlegot/purple_q.jpg" },
-                            w: { nome: "Medo", desc: "Aterroriza os inimigos em formato de cone, forçando-os a fugir na direção oposta enquanto perdem resistência mágica.", img: "icones/habilidades/litlegot/purple_w.jpg" },
-                            e: { nome: "Saudade", desc: "Puxa violentamente os inimigos distantes para o centro de uma área marcada, causando dano em explosão ao se colidirem.", img: "icones/habilidades/litlegot/purple_e.jpg" }
+                        roxo: {
+                            q: { nome: "Melancolia", desc: "Gera névoa densa que reduz o campo de visão dos inimigos e aplica lentidão.", img: "icones/habilidades/litlegot/purple_q.jpg" },
+                            w: { nome: "Medo", desc: "Aterroriza os inimigos em formato de cone, forçando-os a fugir.", img: "icones/habilidades/litlegot/purple_w.jpg" },
+                            e: { nome: "Saudade", desc: "Puxa violentamente os inimigos distantes para o centro da área marcada.", img: "icones/habilidades/litlegot/purple_e.jpg" }
                         }
                     }
                 }
@@ -376,10 +549,10 @@
                 atributos: { ad: 65, ap: 0, df: 35, dm: 32, vm: 600, vda: "0.650", vdm: "345", ah: "0", vf: "5%", vmg: "0%", vu: "0%" },
                 skills: {
                     p: { nome: "A falácia do Apostador", desc: "O usuário ganha mais vampirismo conforme sua chance de acerto crítico aumenta.", img: "icones/habilidades/abrax/passiva.jpg" },
-                    q: { nome: "Mascarada dos Tolos", desc: "Abre o inventário de habilidades. Q, W e E viram as últimas habilidades roubadas de aliados ou inimigos. O R cancela a ação.", img: "icones/habilidades/abrax/1_hab.jpg" },
+                    q: { nome: "Mascarada dos Tolos", desc: "Abre o inventário de habilidades. Q, W e E viram as últimas habilidades roubadas.", img: "icones/habilidades/abrax/1_hab.jpg" },
                     w: { nome: "Honestamente?", desc: "Um avanço rápido (Dash) na direção do cursor.", img: "icones/habilidades/abrax/2_hab.jpg" },
                     e: { nome: "Sobrecarregada", desc: "Um empurrão poderoso que atordoa os inimigos atingidos.", img: "icones/habilidades/abrax/3_hab.jpg" },
-                    r: { nome: "No limite", desc: "Passivo: Quanto menor a vida de Abrax, maiores ficam seus atributos (Dano, Defesas e Velocidade). Ao ficar à beira da morte, seus status alcançam níveis absurdos e imundos, tornando-a quase imparável.", img: "icones/habilidades/abrax/r_hab.jpg" }
+                    r: { nome: "No limite", desc: "Passivo: Quanto menor a vida, maiores ficam seus atributos de Dano, Defesas e Velocidade.", img: "icones/habilidades/abrax/r_hab.jpg" }
                 }
             },
             psique: {
@@ -389,67 +562,70 @@
                 lore: "Venha abraçar a liberdade que só eu posso lhe dar",
                 atributos: { ad: 55, ap: 10, df: 30, dm: 30, vm: 580, vda: "0.635", vdm: "340", ah: "0", vf: "0%", vmg: "0%", vu: "5%" },
                 skills: {
-                    p: { nome: "Parasita Espiritual", desc: "Rouba atributos, vida e mana dos inimigos ao acertar suas habilidades neles.", img: "icones/habilidades/psique/passiva.jpg" },
-                    q: { nome: "Marca Vital", desc: "Ao marcar um alvo com ataque básico, causar dano a ele cura Psique com base na chance de crítico atual.", img: "icones/habilidades/psique/1_hab.jpg" },
+                    p: { nome: "Parasita Espiritual", desc: "Rouba atributos, vida e mana dos inimigos ao acertar suas habilidades.", img: "icones/habilidades/psique/passiva.jpg" },
+                    q: { nome: "Marca Vital", desc: "Causar dano ao alvo marcado com ataque básico cura Psique baseado em seu crítico.", img: "icones/habilidades/psique/1_hab.jpg" },
                     w: { nome: "Passo Fantasma", desc: "Dá um Dash e fica invisível até usar alguma habilidade ou atacar.", img: "icones/habilidades/psique/2_hab.jpg" },
-                    e: { nome: "Enxame de Memórias", desc: "Cria borboletas que coletam as últimas habilidades usadas pelos heróis para ela ou um aliado usar.", img: "icones/habilidades/psique/3_hab.jpg" },
-                    r: { nome: "Domínio Sombrio", desc: "Cria uma área ao redor que cura Psique constantemente enquanto causa dano aos inimigos dentro dela.", img: "icones/habilidades/psique/r_hab.jpg" }
+                    e: { nome: "Enxame de Memórias", desc: "Cria borboletas que coletam as últimas habilidades usadas para ela ou um aliado.", img: "icones/habilidades/psique/3_hab.jpg" },
+                    r: { nome: "Domínio Sombrio", desc: "Cria uma área que cura Psique enquanto causa dano constante nos inimigos.", img: "icones/habilidades/psique/r_hab.jpg" }
                 }
             }
         };
 
         const dadosRunas = [
-            { id: "runa1", nome: "Até o Último Suspiro", desc: "Aumenta a vida máxima conforme ela fica baixa (escalonamento de risco).", icone: "icones/runas/ultimo_suspiro.jpg" },
+            { id: "runa1", nome: "Até o Último Suspiro", desc: "Aumenta a vida máxima conforme ela fica baixa.", icone: "icones/runas/ultimo_suspiro.jpg" },
             { id: "runa2", nome: "Desejo de Guerra", desc: "Aumenta sua defesa máxima com base no seu ataque (AD) atual.", icone: "icones/runas/desejo_guerra.jpg" },
-            { id: "runa3", nome: "Gimmi", desc: "Itens mais baratos, mas cobra juros no próximo item diminuindo curas e escudos recebidos.", icone: "icones/runas/gimmi.jpg" }
+            { id: "runa3", nome: "Gimmi", desc: "Itens mais baratos, mas cobra juros diminuindo curas e escudos recebidos.", icone: "icones/runas/gimmi.jpg" }
         ];
 
         /* =========================================
-           LÓGICA DO SISTEMA
+           ESTADO LOCAL DA SELEÇÃO
            ========================================= */
+        let chaveCampeaoSelecionado = null;
         let campeaoSelecionado = null;
         let runaSelecionada = null;
+        let faseAtual = "BAN"; // BAN, PICK, FINALIZADO
+        let listaBanidos = [];
 
-        // Renderizar Lista de Campeões
+        // Inicializar Renderização da Lista de Campeões
         const listaCampeoesDiv = document.getElementById('lista-campeoes');
         for (const key in dadosCampeoes) {
             const camp = dadosCampeoes[key];
             const div = document.createElement('div');
             div.className = 'campeao-icone';
-            
-            if(camp.icone && camp.icone !== "") {
-                div.style.backgroundImage = `url('${camp.icone}')`;
-            }
+            div.id = `card-champ-${key}`;
+            if(camp.icone) div.style.backgroundImage = `url('${camp.icone}')`;
             div.innerHTML = `<span>${camp.nome}</span>`;
-            
             div.onclick = () => selecionarCampeao(key, div);
             listaCampeoesDiv.appendChild(div);
         }
 
-        // Renderizar Lista de Runas
+        // Inicializar Renderização da Lista de Runas
         const listaRunasDiv = document.getElementById('lista-runas');
         dadosRunas.forEach(runa => {
             const div = document.createElement('div');
             div.className = 'runa';
             div.onclick = () => selecionarRuna(runa.id, div);
-            
             div.innerHTML = `
-                <div class="runa-icone" style="background-image: ${runa.icone !== '' ? `url('${runa.icone}')` : 'none'}"></div>
+                <div class="runa-icone" style="background-image: ${runa.icone ? `url('${runa.icone}')` : 'none'}"></div>
                 <div class="runa-titulo">${runa.nome}</div>
                 <div class="runa-desc">${runa.desc}</div>
             `;
             listaRunasDiv.appendChild(div);
         });
 
-        // Função ao clicar num campeão
+        /* =========================================
+           AÇÕES DE INTERFACE DO JOGADOR
+           ========================================= */
         function selecionarCampeao(key, elementoHtml) {
+            if (listaBanidos.includes(key)) return;
+
+            chaveCampeaoSelecionado = key;
             campeaoSelecionado = dadosCampeoes[key];
             
             document.querySelectorAll('.campeao-icone').forEach(el => el.classList.remove('ativo'));
             elementoHtml.classList.add('ativo');
             
             document.getElementById('painel-detalhes').style.display = 'block';
-
             document.getElementById('nome-campeao').innerText = campeaoSelecionado.nome;
             document.getElementById('classe-campeao').innerText = campeaoSelecionado.classe;
             document.getElementById('lore-campeao').innerText = campeaoSelecionado.lore;
@@ -467,12 +643,10 @@
             document.getElementById('attr-vmg').innerText = attr.vmg;
             document.getElementById('attr-vu').innerText = attr.vu;
 
-            // Carregar habilidades principais
             ['p', 'q', 'w', 'e', 'r'].forEach(tecla => {
                 const imgSkill = campeaoSelecionado.skills[tecla].img;
                 const btnSkill = document.getElementById(`icone-${tecla}`);
-                
-                if(imgSkill && imgSkill !== "") {
+                if(imgSkill) {
                     btnSkill.style.backgroundImage = `url('${imgSkill}')`;
                     btnSkill.innerText = "";
                 } else {
@@ -481,18 +655,14 @@
                 }
             });
 
-            // Gerar Habilidades Secundárias se o campeão tiver (ex: Litlegot)
             const secContainer = document.getElementById('habilidades-secundarias');
             secContainer.innerHTML = '';
             
             if (campeaoSelecionado.skills.secundarias) {
                 secContainer.style.display = 'block';
-                
                 for (const cor in campeaoSelecionado.skills.secundarias) {
                     let nomeCor = cor.charAt(0).toUpperCase() + cor.slice(1);
-                    // Definindo as cores hexadecimais para as bordas das skills
                     let colorCode = cor === 'laranja' ? '#ff9900' : (cor === 'verde' ? '#33cc33' : '#9933cc');
-                    
                     let htmlSecundaria = `
                     <div style="margin-bottom: 10px;">
                         <h4 style="font-size: 0.85rem; color: ${colorCode}; text-align: left; margin-bottom: 5px;">Forma Secundária: ${nomeCor}</h4>
@@ -500,17 +670,12 @@
                     
                     ['q', 'w', 'e'].forEach(tecla => {
                         const skillSec = campeaoSelecionado.skills.secundarias[cor][tecla];
-                        const temImg = skillSec.img && skillSec.img !== "";
-                        const bgStyle = temImg ? `background-image: url('${skillSec.img}'); color: transparent;` : "";
-                        
+                        const bgStyle = skillSec.img ? `background-image: url('${skillSec.img}'); color: transparent;` : "";
                         htmlSecundaria += `
-                            <div class="skill-icone" 
-                                 style="border-color: ${colorCode}; ${bgStyle}" 
-                                 onmouseover="mostrarSkillSecundaria('${cor}', '${tecla}')">
-                                 ${tecla.toUpperCase()}
+                            <div class="skill-icone" style="border-color: ${colorCode}; ${bgStyle}" onmouseover="mostrarSkillSecundaria('${cor}', '${tecla}')">
+                                ${tecla.toUpperCase()}
                             </div>`;
                     });
-                    
                     htmlSecundaria += `</div></div>`;
                     secContainer.innerHTML += htmlSecundaria;
                 }
@@ -519,9 +684,13 @@
             }
 
             document.getElementById('descricao-skill').innerHTML = "Passe o mouse sobre uma habilidade para ver a descrição.";
+
+            // Notifica o servidor da pré-seleção
+            if (faseAtual === "PICK") {
+                socket.emit("preselecionar_campeao", { campeao: key });
+            }
         }
 
-        // Mostrar habilidade principal no hover
         function mostrarSkill(tecla) {
             if(!campeaoSelecionado) return;
             const skill = campeaoSelecionado.skills[tecla];
@@ -531,37 +700,113 @@
             `;
         }
 
-        // Mostrar habilidade secundária no hover
         function mostrarSkillSecundaria(cor, tecla) {
             if(!campeaoSelecionado || !campeaoSelecionado.skills.secundarias) return;
             const skill = campeaoSelecionado.skills.secundarias[cor][tecla];
             let colorCode = cor === 'laranja' ? '#ff9900' : (cor === 'verde' ? '#33cc33' : '#9933cc');
-            
             document.getElementById('descricao-skill').innerHTML = `
                 <strong style="color:${colorCode};">[${tecla.toUpperCase()} - FORMA ${cor.toUpperCase()}] ${skill.nome}</strong><br><br>
                 ${skill.desc}
             `;
         }
 
-        // Selecionar Runa
         function selecionarRuna(id, elementoHtml) {
             runaSelecionada = id;
             document.querySelectorAll('.runa').forEach(el => el.classList.remove('ativa'));
             elementoHtml.classList.add('ativa');
+            socket.emit("selecionar_runa", { runaId: id });
         }
 
-        // Botão Confirmar
-        document.getElementById('btn-confirmar').onclick = () => {
-            if(!campeaoSelecionado) {
-                alert("Por favor, selecione um campeão primeiro!");
+        function alterarRota(novaRota) {
+            socket.emit("alterar_rota", { rota: novaRota });
+        }
+
+        function banirCampeao() {
+            if(!chaveCampeaoSelecionado) {
+                alert("Selecione um campeão para banir!");
+                return;
+            }
+            socket.emit("banir_campeao", { campeao: chaveCampeaoSelecionado });
+            document.getElementById('btn-banir').disabled = true;
+        }
+
+        function confirmarEscolha() {
+            if(!chaveCampeaoSelecionado) {
+                alert("Selecione um campeão!");
                 return;
             }
             if(!runaSelecionada) {
-                alert("Não esqueça de selecionar sua Runa!");
+                alert("Selecione uma Runa antes de confirmar!");
                 return;
             }
-            alert(`Sua partida vai começar!\nCampeão: ${campeaoSelecionado.nome}\nRuna Escolhida: ${dadosRunas.find(r => r.id === runaSelecionada).nome}`);
-        };
+            socket.emit("confirmar_campeao", { 
+                campeao: chaveCampeaoSelecionado, 
+                runa: runaSelecionada 
+            });
+            document.getElementById('btn-confirmar').disabled = true;
+        }
+
+        /* =========================================
+           EVENTOS DO SERVIDOR (SOCKET.IO)
+           ========================================= */
+
+        // Entrar na Sala ao Carregar
+        socket.emit("entrar_sala", { rotaInicial: document.getElementById('select-rota').value });
+
+        // Atualização Geral do Estado da Sala
+        socket.on("atualizar_estado", (estado) => {
+            faseAtual = estado.fase;
+            
+            // Atualizar Temporizador e Texto de Fase
+            document.getElementById('timer-display').innerText = estado.tempoRestante;
+            document.getElementById('texto-fase').innerText = 
+                faseAtual === "BAN" ? "FASE DE BANIMENTO" :
+                faseAtual === "PICK" ? "SELEÇÃO DE ROTAS E CAMPEÕES" : "INICIANDO PARTIDA...";
+
+            // Habilitar/Desabilitar botões conforme a fase
+            document.getElementById('btn-banir').disabled = (faseAtual !== "BAN");
+            document.getElementById('btn-confirmar').disabled = (faseAtual !== "PICK");
+
+            // Atualizar Lista de Banimentos
+            listaBanidos = estado.banidos || [];
+            const containerBans = document.getElementById('lista-bans');
+            containerBans.innerHTML = '';
+            
+            listaBanidos.forEach(campKey => {
+                const elChamp = document.getElementById(`card-champ-${campKey}`);
+                if (elChamp) elChamp.classList.add('banido');
+
+                const banSlot = document.createElement('div');
+                banSlot.className = 'ban-slot';
+                if(dadosCampeoes[campKey]?.icone) {
+                    banSlot.style.backgroundImage = `url('${dadosCampeoes[campKey].icone}')`;
+                }
+                containerBans.appendChild(banSlot);
+            });
+
+            // Atualizar Lista de Jogadores da Sala
+            const gridJogadores = document.getElementById('jogadores-grid');
+            gridJogadores.innerHTML = '';
+
+            estado.jogadores.forEach(j => {
+                const card = document.createElement('div');
+                card.className = `card-jogador ${j.conectado ? 'conectado' : ''} ${j.confirmado ? 'confirmado' : ''}`;
+                
+                const imgChamp = j.campeao ? dadosCampeoes[j.campeao]?.icone : '';
+                
+                card.innerHTML = `
+                    <div class="nick">${j.nome || 'Invocador'}</div>
+                    <div class="rota-tag">${j.rota || 'Líder'}</div>
+                    <div class="avatar-pick" style="background-image: ${imgChamp ? `url('${imgChamp}')` : 'none'}"></div>
+                `;
+                gridJogadores.appendChild(card);
+            });
+        });
+
+        // Evento para redirecionar à tela de carregamento
+        socket.on("ir_para_loading", () => {
+            window.location.href = "loading.html";
+        });
     </script>
 </body>
 </html>
