@@ -6,7 +6,6 @@
     <title>Lobby - Aurore Boreale</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        /* Tema Clássico League of Legends */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
@@ -20,417 +19,421 @@
             overflow: hidden;
         }
 
-        h1, h2, h3 {
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            color: #f0e6d2;
-        }
+        h1, h2, h3 { font-family: 'Cinzel', serif; text-transform: uppercase; color: #f0e6d2; }
+        button { cursor: pointer; border: none; outline: none; font-family: 'Roboto', sans-serif; }
+        input { outline: none; font-family: 'Roboto', sans-serif; }
 
-        /* Barra Superior (Navegação e Perfil) */
+        /* HEADER */
         header {
             background: linear-gradient(to bottom, #1e2328, #0a0a0c);
             border-bottom: 2px solid #785a28;
-            padding: 15px 30px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.8);
         }
 
-        .perfil-jogador {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .perfil { display: flex; align-items: center; gap: 15px; }
+        /* Avatar 100% CSS, sem imagens externas */
+        .avatar {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: #1e2328; border: 2px solid #c8aa6e;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: #f0e6d2; font-size: 1.2rem;
         }
+        .info h2 { font-size: 1.1rem; }
+        .info p { font-size: 0.8rem; color: #a09b8c; }
+        
+        .busca-sala { display: flex; gap: 10px; }
+        .busca-sala input { padding: 8px; background: #010a13; border: 1px solid #785a28; color: #f0e6d2; text-transform: uppercase;}
+        .busca-sala button { background: #1e2328; border: 1px solid #c8aa6e; color: #c8aa6e; padding: 0 15px; font-weight: bold; }
 
-        /* Avatar sem imagens externas (Usa gradiente e CSS) */
-        .icone-perfil {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            border: 2px solid #c8aa6e;
-            background: linear-gradient(135deg, #1e2328 0%, #463714 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Cinzel', serif;
-            font-size: 1.8rem;
-            color: #f0e6d2;
-            text-shadow: 0 2px 5px black;
+        /* MAIN LAYOUT */
+        main { display: flex; flex: 1; overflow: hidden; }
+
+        /* PAINEL SOCIAL (ESQUERDA) */
+        .social {
+            width: 280px; background: rgba(1, 10, 19, 0.85);
+            border-right: 1px solid #463714; display: flex; flex-direction: column;
         }
+        .social-tabs { display: flex; border-bottom: 1px solid #463714; }
+        .social-tabs button { flex: 1; padding: 10px; background: transparent; color: #a09b8c; border-bottom: 2px solid transparent; }
+        .social-tabs button.ativo { color: #f0e6d2; border-bottom: 2px solid #c8aa6e; }
+        
+        .add-amigo { display: flex; padding: 10px; border-bottom: 1px solid #463714; }
+        .add-amigo input { flex: 1; background: #010a13; border: 1px solid #785a28; color: #f0e6d2; padding: 8px; }
+        .add-amigo button { background: #1e2328; border: 1px solid #c8aa6e; color: #c8aa6e; padding: 0 10px; }
+        
+        .lista { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(30, 35, 40, 0.4); }
+        .item-lista button { background: transparent; border: 1px solid #c8aa6e; color: #c8aa6e; padding: 4px 8px; font-size: 0.7rem; }
 
-        .info-perfil h2 { font-size: 1.2rem; }
-        .info-perfil p { color: #a09b8c; font-size: 0.9rem; }
-
-        /* Área Central (Grupo e Buscar Partida) */
-        main {
-            display: flex;
-            flex: 1;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        .area-grupo {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(1, 10, 19, 0.6);
-            border: 1px solid #463714;
+        /* PAINEL DA SALA (CENTRO) */
+        .sala {
+            flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px;
             position: relative;
         }
-
-        .membros-grupo {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 50px;
+        .info-sala { text-align: center; margin-bottom: 40px; }
+        .slots { display: flex; gap: 15px; }
+        .slot {
+            width: 130px; height: 180px; border: 1px dashed #785a28; background: rgba(30, 35, 40, 0.5);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #5c5b57; position: relative;
         }
-
-        .slot-jogador {
-            width: 120px; height: 180px;
-            border: 1px dashed #785a28;
-            background: rgba(30, 35, 40, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #5c5b57;
-            text-align: center;
-            transition: 0.3s;
-        }
-
-        .slot-jogador.ocupado {
-            border: 1px solid #c8aa6e;
-            color: #f0e6d2;
-            background: #1e2328;
-        }
-
+        .slot.ocupado { border: 1px solid #c8aa6e; background: #1e2328; color: #f0e6d2; }
+        .adm-icon { position: absolute; top: 5px; right: 5px; color: gold; font-size: 1.2rem; display: none; }
+        .slot.adm .adm-icon { display: block; }
+        
         .btn-jogar {
-            background: linear-gradient(to bottom, #1e2328, #0a0a0c);
-            border: 2px solid #c8aa6e;
-            color: #f0e6d2;
-            padding: 20px 60px;
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 0 20px rgba(200, 170, 110, 0.2);
+            margin-top: auto; margin-bottom: 20px; background: linear-gradient(to bottom, #1e2328, #0a0a0c);
+            border: 2px solid #c8aa6e; color: #f0e6d2; padding: 15px 50px; font-family: 'Cinzel', serif; font-size: 1.2rem; display: none;
         }
 
-        .btn-jogar:hover {
-            box-shadow: 0 0 30px rgba(200, 170, 110, 0.6);
-            background: linear-gradient(to bottom, #2b3137, #1e2328);
+        /* PAINEL DE CHATS (DIREITA) */
+        .chats {
+            width: 320px; background: rgba(1, 10, 19, 0.9); border-left: 1px solid #463714;
+            display: flex; flex-direction: column;
+        }
+        .chat-tabs { display: flex; border-bottom: 1px solid #463714; }
+        .chat-tabs button {
+            flex: 1; padding: 15px 5px; background: transparent; color: #a09b8c;
+            border-bottom: 2px solid transparent; position: relative; font-size: 0.9rem;
+        }
+        .chat-tabs button.ativo { color: #f0e6d2; border-bottom: 2px solid #c8aa6e; background: rgba(200,170,110,0.1); }
+        
+        /* A famosa Bolinha Amarela */
+        .notificacao {
+            position: absolute; top: 10px; right: 10px; width: 10px; height: 10px;
+            background-color: #ffcc00; border-radius: 50%; display: none;
+            box-shadow: 0 0 8px #ffcc00;
         }
 
-        /* Painel Social (Lista de Amigos) */
-        .painel-social {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(1, 10, 19, 0.85);
-            border: 1px solid #463714;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .social-header {
-            padding: 15px;
-            border-bottom: 1px solid #463714;
-            text-align: center;
-        }
-
-        .add-amigo {
-            display: flex;
-            padding: 10px;
-            gap: 5px;
-            border-bottom: 1px solid #463714;
-        }
-
-        .add-amigo input {
-            flex: 1;
-            background: #010a13;
-            border: 1px solid #785a28;
-            color: #f0e6d2;
-            padding: 8px;
-            outline: none;
-        }
-
-        .add-amigo button {
-            background: #1e2328;
-            border: 1px solid #c8aa6e;
-            color: #c8aa6e;
-            cursor: pointer;
-            padding: 0 10px;
-        }
-
-        .lista-amigos {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .amigo-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: rgba(30, 35, 40, 0.3);
-            border: 1px solid transparent;
-            margin-bottom: 5px;
-            cursor: default;
-        }
-
-        .amigo-item:hover {
-            border-color: #463714;
-            background: rgba(30, 35, 40, 0.8);
-        }
-
-        .amigo-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .amigo-nome { color: #f0e6d2; font-weight: bold; }
-        .amigo-status { color: #33cc33; font-size: 0.8rem; }
-
-        .btn-convidar {
-            background: transparent;
-            border: 1px solid #c8aa6e;
-            color: #c8aa6e;
-            cursor: pointer;
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            transition: 0.2s;
-        }
-
-        .btn-convidar:hover {
-            background: #c8aa6e;
-            color: #0a0a0c;
-        }
-
-        /* Chat do Lobby */
-        .chat-container {
-            height: 200px;
-            background: rgba(1, 10, 19, 0.9);
-            border-top: 2px solid #785a28;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-mensagens {
-            flex: 1;
-            padding: 10px 20px;
-            overflow-y: auto;
-            font-size: 0.9rem;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .msg-sistema { color: #a09b8c; font-style: italic; }
-        .msg-jogador { color: #f0e6d2; }
-        .msg-jogador span { color: #c8aa6e; font-weight: bold; }
-
-        .chat-input {
-            display: flex;
-            padding: 10px;
-            border-top: 1px solid #463714;
-        }
-
-        .chat-input input {
-            flex: 1;
-            background: #010a13;
-            border: 1px solid #785a28;
-            color: #f0e6d2;
-            padding: 10px;
-            outline: none;
-        }
+        .chat-box { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+        .msg-sys { color: #a09b8c; font-style: italic; }
+        .msg-user { color: #f0e6d2; }
+        .msg-user span { color: #c8aa6e; font-weight: bold; }
+        
+        .chat-input { display: flex; padding: 10px; border-top: 1px solid #463714; }
+        .chat-input input { flex: 1; background: #010a13; border: 1px solid #785a28; color: #f0e6d2; padding: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO DO CLIENT -->
     <header>
-        <div class="perfil-jogador">
-            <div class="icone-perfil" id="avatar-letra">?</div>
-            <div class="info-perfil">
-                <h2 id="nome-jogador">Carregando...</h2>
-                <p>Nível 1 • ID: <span id="id-jogador">#BRA1</span></p>
+        <div class="perfil">
+            <div class="avatar" id="meu-avatar">?</div>
+            <div class="info">
+                <h2 id="meu-nome">Carregando...</h2>
+                <p>UID: <span id="meu-uid">...</span></p>
             </div>
         </div>
-        <h3>LOBBY - AURORE BOREALE</h3>
-        <p id="btn-sair" style="color: #5c5b57; cursor: pointer;">Sair</p>
+        
+        <div class="busca-sala">
+            <input type="text" id="input-sala-id" placeholder="ID da Sala...">
+            <button id="btn-entrar-sala">Entrar / Criar Sala</button>
+        </div>
+        
+        <p id="btn-sair" style="color: #a09b8c; cursor: pointer; font-size: 0.9rem;">Desconectar</p>
     </header>
 
-    <!-- ÁREA PRINCIPAL -->
     <main>
-        <!-- SALA / GRUPO -->
-        <div class="area-grupo">
-            <h2 style="position: absolute; top: 20px;">Sua Sala</h2>
-            
-            <div class="membros-grupo" id="slots-grupo">
-                <div class="slot-jogador ocupado" id="meu-slot">
-                    <div id="avatar-slot" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #1e2328, #c8aa6e); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 1.5rem; color: #000; font-weight: bold;">?</div>
-                    <span id="nome-slot">Você</span>
-                </div>
-                <div class="slot-jogador">Aguardando...</div>
-                <div class="slot-jogador">Aguardando...</div>
-                <div class="slot-jogador">Aguardando...</div>
-                <div class="slot-jogador">Aguardando...</div>
+        <!-- PAINEL SOCIAL -->
+        <aside class="social">
+            <div class="social-tabs">
+                <button class="ativo" id="tab-amigos">Amigos</button>
+                <button id="tab-pedidos">Pedidos <span class="notificacao" id="notif-pedidos"></span></button>
+            </div>
+            <div class="add-amigo">
+                <input type="text" id="input-add-amigo" placeholder="Email do jogador...">
+                <button id="btn-add-amigo">+</button>
+            </div>
+            <div class="lista" id="lista-social">
+                <!-- Preenchido via JS -->
+            </div>
+        </aside>
+
+        <!-- PAINEL SALA -->
+        <section class="sala">
+            <div class="info-sala">
+                <h2 id="titulo-sala">Nenhuma sala conectada</h2>
+                <p id="subtitulo-sala" style="color:#a09b8c">Crie ou entre em uma sala pelo ID acima.</p>
+            </div>
+
+            <div class="slots" id="slots-container">
+                <!-- 5 Slots Gerados via JS -->
             </div>
 
             <button class="btn-jogar" id="btn-jogar">INICIAR PARTIDA</button>
-        </div>
+        </section>
 
-        <!-- PAINEL SOCIAL -->
-        <aside class="painel-social">
-            <div class="social-header">
-                <h3>Amigos</h3>
+        <!-- PAINEL DE CHAT -->
+        <aside class="chats">
+            <div class="chat-tabs">
+                <button class="ativo" id="tab-chat-global">Global <span class="notificacao" id="notif-global"></span></button>
+                <button id="tab-chat-sala">Sala <span class="notificacao" id="notif-sala"></span></button>
+                <button id="tab-chat-priv">Privado <span class="notificacao" id="notif-priv"></span></button>
             </div>
-            
-            <div class="add-amigo">
-                <input type="text" id="input-add-amigo" placeholder="Adicionar por ID (ex: Joao#123)">
-                <button id="btn-add-amigo">+</button>
+            <div class="chat-box" id="chat-box"></div>
+            <div class="chat-input">
+                <input type="text" id="input-chat" placeholder="Digite sua mensagem...">
             </div>
-
-            <!-- Lista de amigos inicia completamente limpa -->
-            <div class="lista-amigos" id="lista-amigos"></div>
         </aside>
     </main>
 
-    <!-- CHAT -->
-    <footer class="chat-container">
-        <div class="chat-mensagens" id="chat-mensagens">
-            <div class="msg-sistema">Conectando ao servidor global...</div>
-        </div>
-        <div class="chat-input">
-            <input type="text" id="input-chat" placeholder="Digite para o chat global...">
-        </div>
-    </footer>
-
-    <!-- SCRIPT DO SERVIDOR -->
     <script type="module">
         import { auth, db } from '../backend/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { ref, push, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { ref, set, get, push, onValue, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        let jogadorAtual = "Convidado";
+        // Variáveis Globais de Estado
+        let usuario = null;
+        let salaAtualId = null;
+        let abaChatAtiva = "global"; // global, sala, priv
 
-        // 1. VERIFICAÇÃO DE LOGIN
+        // Elementos de Interface
+        const uiChatBox = document.getElementById('chat-box');
+        const uiInputChat = document.getElementById('input-chat');
+        const uiSlots = document.getElementById('slots-container');
+        const uiBtnJogar = document.getElementById('btn-jogar');
+        const uiListaSocial = document.getElementById('lista-social');
+
+        // 1. AUTENTICAÇÃO E PERFIL
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Jogador está logado, atualiza a interface
-                jogadorAtual = user.displayName || user.email.split('@')[0];
-                const letraInicial = jogadorAtual.charAt(0).toUpperCase();
-
-                // Atualiza os nomes
-                document.getElementById('nome-jogador').innerText = jogadorAtual;
-                document.getElementById('nome-slot').innerText = jogadorAtual;
+                usuario = {
+                    uid: user.uid,
+                    nome: user.displayName || user.email.split('@')[0],
+                    email: user.email
+                };
                 
-                // Coloca a primeira letra do nome como Avatar dinâmico
-                document.getElementById('avatar-letra').innerText = letraInicial;
-                document.getElementById('avatar-slot').innerText = letraInicial;
+                document.getElementById('meu-nome').innerText = usuario.nome;
+                document.getElementById('meu-uid').innerText = usuario.uid.substring(0,6).toUpperCase();
+                document.getElementById('meu-avatar').innerText = usuario.nome.charAt(0).toUpperCase();
 
-                document.getElementById('chat-mensagens').innerHTML += `<div class="msg-sistema">Bem-vindo(a), ${jogadorAtual}! Conectado ao Chat Global.</div>`;
+                iniciarLobbyReativo();
             } else {
-                // Jogador não está logado, expulsa para a tela de login
                 window.location.href = '../index.html';
             }
         });
 
-        // 2. BOTÃO SAIR (LOGOUT)
-        document.getElementById('btn-sair').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = '../index.html';
+        document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
+
+        function iniciarLobbyReativo() {
+            escutarChatGlobal();
+            escutarPedidosAmizade();
+            escutarAmigos();
+            desenharSlotsVazios();
+        }
+
+        // ==========================================
+        // SISTEMA DE CHAT (Bolinhas e Abas)
+        // ==========================================
+        const abasChat = {
+            global: document.getElementById('tab-chat-global'),
+            sala: document.getElementById('tab-chat-sala'),
+            priv: document.getElementById('tab-chat-priv')
+        };
+        const notifsChat = {
+            global: document.getElementById('notif-global'),
+            sala: document.getElementById('notif-sala'),
+            priv: document.getElementById('notif-priv')
+        };
+
+        // Trocar de Aba de Chat
+        Object.keys(abasChat).forEach(key => {
+            abasChat[key].addEventListener('click', () => {
+                Object.values(abasChat).forEach(btn => btn.classList.remove('ativo'));
+                abasChat[key].classList.add('ativo');
+                notifsChat[key].style.display = 'none'; // Limpa a bolinha
+                abaChatAtiva = key;
+                uiChatBox.innerHTML = ''; // Limpa tela
+                // Recarrega histórico baseado na aba (simplificado para o momento)
+                uiChatBox.innerHTML = `<div class="msg-sys">Conectado ao chat ${key}...</div>`;
             });
         });
 
-        // 3. CHAT GLOBAL EM TEMPO REAL (Sincronizado via Firebase)
-        const chatInput = document.getElementById('input-chat');
-        const chatBox = document.getElementById('chat-mensagens');
+        // Enviar Mensagem
+        uiInputChat.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && uiInputChat.value.trim() !== '') {
+                const texto = uiInputChat.value.trim();
+                uiInputChat.value = '';
 
-        chatInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                const texto = chatInput.value.trim();
-                if (texto !== '') {
-                    push(ref(db, 'lobby/chat'), {
-                        nome: jogadorAtual,
-                        texto: texto,
-                        timestamp: serverTimestamp()
-                    });
-                    chatInput.value = '';
+                if (abaChatAtiva === 'global') {
+                    push(ref(db, 'chats/global'), { nome: usuario.nome, texto, ts: serverTimestamp() });
+                } else if (abaChatAtiva === 'sala' && salaAtualId) {
+                    push(ref(db, `salas/${salaAtualId}/chat`), { nome: usuario.nome, texto, ts: serverTimestamp() });
+                } else if (abaChatAtiva === 'priv') {
+                    uiChatBox.innerHTML += `<div class="msg-sys">Selecione um amigo para chat privado.</div>`;
                 }
             }
         });
 
-        onChildAdded(ref(db, 'lobby/chat'), (snapshot) => {
-            const data = snapshot.val();
-            if(data.nome === jogadorAtual) {
-                chatBox.innerHTML += `<div class="msg-jogador"><span>Você:</span> ${data.texto}</div>`;
-            } else {
-                chatBox.innerHTML += `<div class="msg-jogador" style="color:#a09b8c"><span>${data.nome}:</span> ${data.texto}</div>`;
-            }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
+        // Receber Mensagem Global
+        function escutarChatGlobal() {
+            onValue(ref(db, 'chats/global'), (snapshot) => {
+                const msgs = snapshot.val();
+                if(!msgs) return;
+                
+                // Pega a última mensagem para notificar
+                const keys = Object.keys(msgs);
+                const ultima = msgs[keys[keys.length - 1]];
 
-        // 4. INICIAR PARTIDA
-        document.getElementById('btn-jogar').addEventListener('click', () => {
-            window.location.href = '../seleção/select.html';
-        });
-
-        // 5. LÓGICA SOCIAL E GRUPO
-        const inputAddAmigo = document.getElementById('input-add-amigo');
-        const btnAddAmigo = document.getElementById('btn-add-amigo');
-        const listaAmigos = document.getElementById('lista-amigos');
-        const slotsGrupo = document.getElementById('slots-grupo').children;
-        let slotsOcupados = 1;
-
-        // Adicionar Amigo
-        btnAddAmigo.addEventListener('click', () => {
-            const idAmigo = inputAddAmigo.value.trim();
-            if (idAmigo !== '') {
-                listaAmigos.innerHTML += `
-                    <div class="amigo-item">
-                        <div class="amigo-info">
-                            <span class="amigo-nome">${idAmigo}</span>
-                            <span class="amigo-status">Online</span>
-                        </div>
-                        <button class="btn-convidar" data-nome="${idAmigo}">Convidar</button>
-                    </div>
-                `;
-                inputAddAmigo.value = '';
-                chatBox.innerHTML += `<div class="msg-sistema">Você adicionou ${idAmigo}.</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-                mapearBotoesConvidar();
-            }
-        });
-
-        // Convidar para o Grupo
-        function mapearBotoesConvidar() {
-            document.querySelectorAll('.btn-convidar').forEach(btn => {
-                const novoBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(novoBtn, btn);
-
-                novoBtn.addEventListener('click', (e) => {
-                    const nomeAmigo = e.target.getAttribute('data-nome');
-                    const letraAmigo = nomeAmigo.charAt(0).toUpperCase();
-
-                    if (slotsOcupados < 5) {
-                        slotsGrupo[slotsOcupados].classList.add('ocupado');
-                        slotsGrupo[slotsOcupados].innerHTML = `
-                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #1e2328, #463714); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 1.5rem; color: #f0e6d2;">
-                                ${letraAmigo}
-                            </div>
-                            ${nomeAmigo.split('#')[0]}
-                        `;
-                        slotsOcupados++;
-                        chatBox.innerHTML += `<div class="msg-sistema">${nomeAmigo} entrou na sala.</div>`;
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    } else {
-                        alert("A sala está cheia!");
-                    }
-                });
+                if (abaChatAtiva === 'global') {
+                    renderizarMensagem(ultima);
+                } else if (ultima.nome !== usuario.nome) {
+                    notifsChat.global.style.display = 'block'; // Ativa a bolinha amarela
+                }
             });
         }
+
+        function renderizarMensagem(data) {
+            const cor = data.nome === usuario.nome ? 'color:#c8aa6e' : 'color:#f0e6d2';
+            uiChatBox.innerHTML += `<div class="msg-user"><span style="${cor}">${data.nome}:</span> ${data.texto}</div>`;
+            uiChatBox.scrollTop = uiChatBox.scrollHeight;
+        }
+
+        // ==========================================
+        // SISTEMA DE SALA E ADMINISTRAÇÃO
+        // ==========================================
+        function desenharSlotsVazios() {
+            uiSlots.innerHTML = '';
+            for(let i = 0; i < 5; i++) {
+                uiSlots.innerHTML += `<div class="slot">Vazio</div>`;
+            }
+        }
+
+        document.getElementById('btn-entrar-sala').addEventListener('click', async () => {
+            const inputId = document.getElementById('input-sala-id').value.trim().toUpperCase();
+            if (!inputId) return alert("Digite um ID de sala.");
+
+            salaAtualId = inputId;
+            const salaRef = ref(db, `salas/${salaAtualId}`);
+            
+            // Verifica se sala existe
+            const snap = await get(salaRef);
+            if (!snap.exists()) {
+                // Cria a sala e define o jogador como Admin (Host)
+                await set(salaRef, {
+                    host: usuario.uid,
+                    status: 'aguardando',
+                    jogadores: {
+                        [usuario.uid]: { nome: usuario.nome, status: 'lobby' }
+                    }
+                });
+            } else {
+                // Entra na sala existente
+                const qtdJogadores = Object.keys(snap.val().jogadores || {}).length;
+                if (qtdJogadores >= 5) return alert("Sala cheia!");
+                
+                await update(ref(db, `salas/${salaAtualId}/jogadores`), {
+                    [usuario.uid]: { nome: usuario.nome, status: 'lobby' }
+                });
+            }
+
+            document.getElementById('titulo-sala').innerText = `SALA: ${salaAtualId}`;
+            document.getElementById('subtitulo-sala').innerText = "Aguardando jogadores...";
+            escutarSala(salaAtualId);
+        });
+
+        function escutarSala(id) {
+            onValue(ref(db, `salas/${id}`), (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados) {
+                    salaAtualId = null;
+                    document.getElementById('titulo-sala').innerText = "Sala Fechada";
+                    desenharSlotsVazios();
+                    return;
+                }
+
+                uiSlots.innerHTML = '';
+                let cont = 0;
+                
+                // Verifica se eu sou o Admin
+                const souAdmin = dados.host === usuario.uid;
+                if (souAdmin && Object.keys(dados.jogadores).length === 5) {
+                    uiBtnJogar.style.display = 'block';
+                } else {
+                    uiBtnJogar.style.display = 'none';
+                }
+
+                // Renderiza jogadores
+                for (let uid in dados.jogadores) {
+                    const jog = dados.jogadores[uid];
+                    const isAdmin = dados.host === uid;
+                    
+                    uiSlots.innerHTML += `
+                        <div class="slot ocupado ${isAdmin ? 'adm' : ''}">
+                            <div class="adm-icon">👑</div>
+                            <div class="avatar" style="margin-bottom:10px">${jog.nome.charAt(0)}</div>
+                            ${jog.nome}
+                            ${souAdmin && !isAdmin ? `<button onclick="expulsar('${uid}')" style="margin-top:10px; color:red; background:none; border:none; cursor:pointer;">Expulsar</button>` : ''}
+                        </div>
+                    `;
+                    cont++;
+                }
+
+                // Preenche o resto
+                for(let i = cont; i < 5; i++) uiSlots.innerHTML += `<div class="slot">Vazio</div>`;
+            });
+
+            // Escutar chat da sala
+            onValue(ref(db, `salas/${id}/chat`), (snapshot) => {
+                const msgs = snapshot.val();
+                if(!msgs) return;
+                const keys = Object.keys(msgs);
+                const ultima = msgs[keys[keys.length - 1]];
+                
+                if (abaChatAtiva === 'sala') renderizarMensagem(ultima);
+                else if (ultima.nome !== usuario.nome) notifsChat.sala.style.display = 'block';
+            });
+        }
+
+        // Expor função globalmente para o botão "Expulsar" do HTML gerado
+        window.expulsar = (uidAlvo) => {
+            if(salaAtualId) remove(ref(db, `salas/${salaAtualId}/jogadores/${uidAlvo}`));
+        };
+
+        uiBtnJogar.addEventListener('click', () => {
+            update(ref(db, `salas/${salaAtualId}`), { status: 'selecao' }).then(() => {
+                window.location.href = '../seleção/select.html?sala=' + salaAtualId;
+            });
+        });
+
+        // ==========================================
+        // SISTEMA SOCIAL (Amigos e Pedidos)
+        // ==========================================
+        // (Estrutura visual preparada, a lógica de requests completa exigiria buscas complexas de email por UID no Firebase, 
+        // mas aqui está a espinha dorsal de como a UI reage à notificação).
+        
+        function escutarPedidosAmizade() {
+            onValue(ref(db, `usuarios/${usuario.uid}/pedidos`), (snapshot) => {
+                if(snapshot.exists()) {
+                    document.getElementById('notif-pedidos').style.display = 'block';
+                } else {
+                    document.getElementById('notif-pedidos').style.display = 'none';
+                }
+            });
+        }
+
+        function escutarAmigos() {
+            onValue(ref(db, `usuarios/${usuario.uid}/amigos`), (snapshot) => {
+                uiListaSocial.innerHTML = '';
+                if(snapshot.exists()) {
+                    const amigos = snapshot.val();
+                    for(let id in amigos) {
+                        uiListaSocial.innerHTML += `
+                            <div class="item-lista">
+                                <span>${amigos[id].nome}</span>
+                                <button>Msg Privada</button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    uiListaSocial.innerHTML = '<div class="msg-sys">Sua lista de amigos está vazia.</div>';
+                }
+            });
+        }
+
     </script>
 </body>
 </html>
