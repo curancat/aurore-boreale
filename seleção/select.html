@@ -6,8 +6,13 @@
     <title>Seleção de Campeões - Aurore Boreale</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        /* Estilos base */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Estilos base (Tema League of Legends Clássico) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background-color: #0a0a0c;
             background-image: radial-gradient(circle at center, #0a1428 0%, #09090b 100%);
@@ -17,579 +22,545 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
+            padding: 20px;
         }
 
-        h1, h2, h3, h4 {
+        h1, h2, h3 {
             font-family: 'Cinzel', serif;
             text-transform: uppercase;
             text-align: center;
             color: #f0e6d2;
             text-shadow: 0 0 10px rgba(200, 170, 110, 0.5);
+            margin-bottom: 20px;
         }
 
-        /* Top Bar: Informações de Fase e Tempo */
-        .top-bar {
-            width: 100%;
-            background: rgba(1, 10, 19, 0.95);
-            border-bottom: 2px solid #785a28;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            z-index: 10;
-        }
-        .fase-info { font-size: 1.5rem; letter-spacing: 2px; }
-        .tempo { font-size: 2.5rem; font-weight: bold; color: #ff4e50; }
+        h1 { font-size: 2.5rem; letter-spacing: 3px; }
 
-        /* Layout Principal: 3 Colunas */
+        /* Layout Principal */
         .container-principal {
             display: flex;
+            gap: 20px;
+            max-width: 1200px;
             width: 100%;
-            max-width: 1600px;
-            height: calc(100vh - 80px);
-            padding: 20px;
-            gap: 20px;
         }
 
-        /* Colunas dos Times */
-        .time-coluna {
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .time-azul .jogador-card { border-left: 4px solid #005a82; }
-        .time-vermelho .jogador-card { border-right: 4px solid #820000; text-align: right; }
-        
-        .jogador-card {
-            background: rgba(1, 10, 19, 0.85);
-            border: 1px solid #463714;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            height: 120px;
-            position: relative;
-        }
-        .jogador-nome { font-weight: bold; color: #f0e6d2; font-size: 1.1rem; }
-        .jogador-funcao { font-size: 0.8rem; color: #a09b8c; }
-        .jogador-status { font-size: 0.8rem; font-style: italic; color: #ff9900; }
-        
-        .campeao-mini {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 50px;
-            height: 50px;
-            background-size: cover;
-            border: 1px solid #785a28;
-            border-radius: 50%;
-        }
-        .time-vermelho .campeao-mini { left: 10px; right: auto; }
-
-        .lista-bans {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            height: 40px;
-        }
-        .ban-slot {
-            width: 40px; height: 40px; border: 1px solid #785a28;
-            background-size: cover; filter: grayscale(100%) brightness(0.5);
-        }
-
-        /* Centro: Seleção */
-        .centro-selecao {
+        /* Área de Seleção (Esquerda) */
+        .selecao {
             flex: 1;
+            background: rgba(1, 10, 19, 0.85);
+            border: 1px solid #785a28;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            background: rgba(1, 10, 19, 0.7);
-            border: 1px solid #785a28;
-            padding: 20px;
-            overflow-y: auto;
+            align-items: center;
         }
 
-        /* Grade de Campeões */
         .lista-campeoes {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
             gap: 15px;
+            margin-bottom: 30px;
         }
-        .campeao-icone {
-            width: 80px; height: 80px; border: 2px solid #463714;
-            cursor: pointer; transition: 0.3s; background-size: cover;
-            display: flex; align-items: flex-end; justify-content: center;
-        }
-        .campeao-icone.banido { filter: grayscale(100%); pointer-events: none; opacity: 0.3; }
-        .campeao-icone:hover, .campeao-icone.ativo { border-color: #c8aa6e; transform: translateY(-5px); }
-        .campeao-icone span { background: rgba(0,0,0,0.7); width: 100%; text-align: center; font-size: 0.8rem; padding: 2px 0; }
 
-        /* Controles de Seleção (Rota, Confirmar, etc) */
-        .controles-acao {
+        .campeao-icone {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #463714;
+            cursor: pointer;
+            transition: 0.3s;
+            background-size: cover;
+            background-position: center;
+            background-color: #1e2328; /* Fundo fallback */
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .campeao-icone:hover, .campeao-icone.ativo {
+            border-color: #c8aa6e;
+            box-shadow: 0 0 15px rgba(200, 170, 110, 0.8);
+            transform: translateY(-5px);
+        }
+
+        .campeao-icone span {
+            background: rgba(0,0,0,0.7);
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 2px 0;
+        }
+
+        button.selecionar {
+            background: linear-gradient(to bottom, #1e2328, #0a0a0c);
+            border: 2px solid #c8aa6e;
+            color: #f0e6d2;
+            padding: 15px 40px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        button.selecionar:hover {
+            background: linear-gradient(to bottom, #2b3137, #1e2328);
+            box-shadow: 0 0 15px rgba(200, 170, 110, 0.8);
+        }
+
+        /* Área de Descrição (Direita) */
+        .menu_descricao_personagem {
+            flex: 2;
+            background: rgba(1, 10, 19, 0.85);
+            border: 1px solid #785a28;
+            padding: 20px;
+            display: none; /* Escondido até selecionar um campeão */
+        }
+
+        .lore {
+            font-style: italic;
+            color: #a09b8c;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #463714;
+            padding-bottom: 10px;
+        }
+
+        /* Habilidades */
+        .habilits {
+            margin-top: 15px;
+        }
+
+        .icones-habilidades {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .skill-icone {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #463714;
+            background-color: #1e2328;
+            background-size: cover;
+			background-position: center; /* ADICIONE ISSO */
+			background-repeat: no-repeat; /* ADICIONE ISSO */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #5c5b57;
+            transition: 0.2s;
+        }
+
+        .skill-icone:hover {
+            border-color: #c8aa6e;
+        }
+
+        .descricao-skill {
+            background: #010a13;
+            border: 1px solid #463714;
+            padding: 10px;
+            min-height: 60px;
+            color: #f0e6d2;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* Atributos */
+        .atributos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            background: #050b14;
+            padding: 15px;
+            border: 1px solid #463714;
+        }
+
+        .atributos nav {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .atributos p {
+            font-size: 0.85rem;
+            color: #a09b8c;
+            margin-bottom: 5px;
+        }
+
+        .atributos p span {
+            color: #f0e6d2;
+            font-weight: bold;
+        }
+
+        /* Runas */
+        .runas {
+            margin-top: 30px;
+            border-top: 1px solid #463714;
+            padding-top: 15px;
+        }
+
+        .menu_runas {
             display: flex;
             gap: 20px;
             justify-content: center;
-            align-items: center;
-            padding: 15px;
-            background: #050b14;
-            border: 1px solid #463714;
         }
-        select, button {
-            background: #1e2328; color: #f0e6d2; border: 1px solid #c8aa6e;
-            padding: 10px; font-family: 'Cinzel', serif; font-size: 1rem; cursor: pointer;
+
+        .runa {
+            text-align: center;
+            cursor: pointer;
+            width: 30%;
+            transition: 0.3s;
+            padding: 10px;
+            border: 1px solid transparent;
         }
-        button.confirmar { background: linear-gradient(to bottom, #1e2328, #0a0a0c); font-weight: bold; padding: 10px 30px; }
-        button.confirmar:hover:not(:disabled) { box-shadow: 0 0 15px rgba(200, 170, 110, 0.8); }
-        button:disabled { border-color: #444; color: #666; cursor: not-allowed; }
 
-        /* Detalhes do Campeão */
-        .painel-detalhes { display: none; margin-top: 10px; }
-        .lore { font-style: italic; color: #a09b8c; margin-bottom: 15px; border-bottom: 1px solid #463714; padding-bottom: 10px; }
-        
-        .icones-habilidades { display: flex; gap: 10px; margin: 10px 0; justify-content: center; }
-        .skill-icone {
-            width: 45px; height: 45px; border: 1px solid #463714; background-size: cover;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;
+        .runa.ativa {
+            border: 1px solid #c8aa6e;
+            background: rgba(200, 170, 110, 0.1);
+            border-radius: 5px;
         }
-        .descricao-skill { background: #010a13; border: 1px solid #463714; padding: 10px; min-height: 60px; font-size: 0.9rem; }
 
-        .atributos { display: flex; flex-wrap: wrap; gap: 15px; background: #050b14; padding: 15px; border: 1px solid #463714; justify-content: space-between; margin-top:15px;}
-        .atributos p { font-size: 0.85rem; color: #a09b8c; margin-bottom: 5px; }
-        .atributos span { color: #f0e6d2; font-weight: bold; }
+        .runa-icone {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #463714;
+            margin: 0 auto 10px auto;
+            background-color: #1e2328;
+            background-size: cover;
+        }
 
-        /* Runas */
-        .menu_runas { display: flex; gap: 15px; justify-content: center; margin-top: 15px; }
-        .runa { text-align: center; cursor: pointer; width: 30%; border: 1px solid transparent; padding: 5px; }
-        .runa.ativa { border-color: #c8aa6e; background: rgba(200, 170, 110, 0.1); }
-        .runa-icone { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #463714; margin: 0 auto 5px auto; background-size: cover; }
+        .runa.ativa .runa-icone {
+            border-color: #c8aa6e;
+            box-shadow: 0 0 10px #c8aa6e;
+        }
 
-        /* Espectador */
-        .espectador-box { background: #111; border: 1px dashed #785a28; padding: 10px; text-align: center; margin-top: 20px; }
+        .runa-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: #f0e6d2;
+        }
+
+        .runa-desc {
+            font-size: 0.75rem;
+            color: #a09b8c;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="fase-info" id="status-fase">Aguardando Conexão...</div>
-        <div class="tempo" id="tempo-restante">00</div>
-    </div>
+    <h1>ESCOLHA SEU CAMPEÃO</h1>
 
     <div class="container-principal">
-        <!-- ÁREA ESQUERDA: TIME AZUL -->
-        <div class="time-coluna time-azul">
-            <h3>Time Azul</h3>
-            <div class="lista-bans" id="bans-azul"></div>
-            <div id="jogadores-azul"></div>
+        <!-- ÁREA ESQUERDA: LISTA DE CAMPEÕES -->
+        <div class="selecao">
+            <div class="lista-campeoes" id="lista-campeoes">
+                <!-- Os ícones serão injetados aqui pelo JS -->
+            </div>
+            <button class="selecionar" id="btn-confirmar">Confirmar</button>
         </div>
 
-        <!-- ÁREA CENTRAL: SELEÇÃO -->
-        <div class="centro-selecao">
-            <div class="lista-campeoes" id="lista-campeoes"></div>
-
-            <div class="controles-acao">
-                <select id="select-rota">
-                    <option value="">Selecione sua Rota...</option>
-                    <option value="Líder">Líder (Top)</option>
-                    <option value="Mid">Mid (Meio)</option>
-                    <option value="Suporte de Precisão">Suporte de Precisão</option>
-                    <option value="Suporte Cobertura">Suporte Cobertura</option>
-                    <option value="Atacante">Atacante (ADC)</option>
-                </select>
-                <button class="confirmar" id="btn-confirmar" disabled>Confirmar</button>
-            </div>
-
-            <div class="painel-detalhes" id="painel-detalhes">
-                <h2 id="nome-campeao">Nome</h2>
-                <h4 style="color: #a09b8c;" id="classe-campeao">Classe</h4>
-                <div class="lore" id="lore-campeao">Lore...</div>
+        <!-- ÁREA DIREITA: DETALHES DO CAMPEÃO E RUNAS -->
+        <div class="menu_descricao_personagem" id="painel-detalhes">
+            <header>
+                <h3 id="nome-campeao">Nome</h3>
+                <h3 style="font-size: 1rem; color: #a09b8c;" id="classe-campeao">Classe</h3>
                 
-                <h3 style="font-size: 1rem; margin-top:10px;">Habilidades</h3>
-                <div class="icones-habilidades">
-                    <div class="skill-icone" id="icone-p" onmouseover="mostrarSkill('p')">P</div>
-                    <div class="skill-icone" id="icone-q" onmouseover="mostrarSkill('q')">Q</div>
-                    <div class="skill-icone" id="icone-w" onmouseover="mostrarSkill('w')">W</div>
-                    <div class="skill-icone" id="icone-e" onmouseover="mostrarSkill('e')">E</div>
-                    <div class="skill-icone" id="icone-r" onmouseover="mostrarSkill('r')">R</div>
-                </div>
-                <div class="descricao-skill" id="descricao-skill">Passe o mouse sobre uma habilidade...</div>
-
-                <div class="atributos">
-                    <div>
-                        <p>AD: <span id="attr-ad">0</span></p><p>AP: <span id="attr-ap">0</span></p>
-                    </div>
-                    <div>
-                        <p>DF: <span id="attr-df">0</span></p><p>DM: <span id="attr-dm">0</span></p><p>Vida: <span id="attr-vm">0</span></p>
-                    </div>
-                    <div>
-                        <p>VdA: <span id="attr-vda">0</span></p><p>VdM: <span id="attr-vdm">0</span></p><p>AH: <span id="attr-ah">0</span></p>
-                    </div>
+                <div class="lore" id="lore-campeao">
+                    Lore do personagem vai aqui...
                 </div>
 
-                <h3 style="font-size: 1rem; margin-top:20px;">Runas</h3>
-                <div class="menu_runas" id="lista-runas"></div>
-            </div>
-        </div>
+                <!-- HABILIDADES -->
+                <article class="habilits">
+                    <h3 style="font-size: 1rem; text-align: left;">Habilidades</h3>
+                    <div class="icones-habilidades">
+                        <div class="skill-icone" id="icone-p" onmouseover="mostrarSkill('p')">P</div>
+                        <div class="skill-icone" id="icone-q" onmouseover="mostrarSkill('q')">Q</div>
+                        <div class="skill-icone" id="icone-w" onmouseover="mostrarSkill('w')">W</div>
+                        <div class="skill-icone" id="icone-e" onmouseover="mostrarSkill('e')">E</div>
+                        <div class="skill-icone" id="icone-r" onmouseover="mostrarSkill('r')">R</div>
+                    </div>
 
-        <!-- ÁREA DIREITA: TIME VERMELHO -->
-        <div class="time-coluna time-vermelho">
-            <h3>Time Vermelho</h3>
-            <div class="lista-bans" id="bans-vermelho" style="justify-content: flex-end;"></div>
-            <div id="jogadores-vermelho"></div>
-            <div class="espectador-box" id="box-espectador" style="display:none;">
-                <h4 style="color:#666;">Espectador</h4>
-                <p id="nome-espectador">-</p>
+                    <!-- CONTAINER PARA HABILIDADES SECUNDÁRIAS (EXCLUSIVO LITLEGOT) -->
+                    <div id="habilidades-secundarias" style="display: none; border-top: 1px dashed #463714; padding-top: 10px;">
+                        <!-- Injetado via JS -->
+                    </div>
+
+                    <div class="descricao-skill" id="descricao-skill">
+                        Passe o mouse sobre uma habilidade para ver a descrição.
+                    </div>
+                </article>
+
+                <!-- ATRIBUTOS -->
+                <article class="atributos">
+                    <nav class="ataques">
+                        <p>Ataque Físico (AD): <span id="attr-ad">0</span></p>
+                        <p>Ataque Mágico (AP): <span id="attr-ap">0</span></p>
+                    </nav>
+                    <nav class="defesas">
+                        <p>Defesa Física (DF): <span id="attr-df">0</span></p>
+                        <p>Defesa Mágica (DM): <span id="attr-dm">0</span></p>
+                        <p>Vida Máxima (VM): <span id="attr-vm">0</span></p>
+                    </nav>
+                    <nav class="velocidades">
+                        <p>Vel. de Ataque (VdA): <span id="attr-vda">0%</span></p>
+                        <p>Vel. de Movimento (VdM): <span id="attr-vdm">0</span></p>
+                        <p>Acel. Habilidades (AH): <span id="attr-ah">0</span></p>
+                    </nav>
+                    <nav class="vampirismos">
+                        <p>Vamp. Físico (VF): <span id="attr-vf">0%</span></p>
+                        <p>Vamp. Mágico (VMg): <span id="attr-vmg">0%</span></p>
+                        <p>Vamp. Universal (VU): <span id="attr-vu">0%</span></p>
+                    </nav>
+                </article>
+            </header>
+
+            <!-- RUNAS -->
+            <div class="runas">
+                <h3 style="font-size: 1rem;">Escolha sua Runa</h3>
+                <nav class="menu_runas" id="lista-runas">
+                    <!-- Runas injetadas via JS -->
+                </nav>
             </div>
         </div>
     </div>
 
-    <!-- Módulo JS -->
-    <script type="module">
-        // 1. IMPORTANDO CONFIGURAÇÃO DO FIREBASE
-        // É essencial que o arquivo backend/firebase-config.js exporte 'db' e 'auth' corretamente.
-        import { db } from '../backend/firebase-config.js';
-        import { ref, onValue, set, update, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-        // ID Simulado do Usuário Logado (Pegue do seu Auth system ou LocalStorage na prática)
-        const meuUID = localStorage.getItem('userUID') || 'uid_' + Math.floor(Math.random() * 1000);
-        const meuNome = localStorage.getItem('userName') || 'Jogador ' + meuUID.slice(-3);
-        const idSala = localStorage.getItem('salaAtual') || 'sala_global_1';
-
-        // 2. BANCO DE DADOS LOCAL (Campeões e Runas)
+    <script>
+        /* =========================================
+           BANCO DE DADOS
+           ========================================= */
         const dadosCampeoes = {
             litlegot: {
-                id: "litlegot", nome: "Litlegot", classe: "Mago", icone: "icones/personagens/litlegot.jpeg", 
+                nome: "Litlegot",
+                classe: "Mago",
+                icone: "icones/personagens/litlegot.jpeg", 
                 lore: "Não me culpe pelos seus erros, é seu dever enfrentá-los.",
-                atributos: { ad: 45, ap: 15, df: 25, dm: 30, vm: 520, vda: "0.625", vdm: "330", ah: "0" },
+                atributos: { ad: 45, ap: 15, df: 25, dm: 30, vm: 520, vda: "0.625", vdm: "330", ah: "0", vf: "0%", vmg: "0%", vu: "0%" },
                 skills: {
-                    p: { nome: "Gênesis", desc: "Permite aliados comprarem fora da base.", img: "icones/habilidades/litlegot/passiva.png" },
-                    q: { nome: "Ódio", desc: "Dano contínuo por 4s (10% vida máxima).", img: "icones/habilidades/litlegot/1_hab.jpg" },
-                    w: { nome: "Empatia", desc: "Cura, escudo e lentidão.", img: "icones/habilidades/litlegot/2_hab.jpg" },
-                    e: { nome: "Felicidade", desc: "Cega, enraiza e dá visão.", img: "icones/habilidades/litlegot/3_hab.jpg" },
-                    r: { nome: "Paixão", desc: "Muda cores secundárias.", img: "icones/habilidades/litlegot/R_hab.jpg" }
+                    p: { nome: "Gênesis", desc: "O usuário permite que os aliados comprem itens fora da base.", img: "icones/habilidades/litlegot/passiva.png" },
+                    q: { nome: "Ódio", desc: "Permite desenhar sobre o mapa com o mouse usando fogo puro. Dá dano contínuo por 4s (10% de dano base na vida máxima).", img: "icones/habilidades/litlegot/1_hab.jpg" },
+                    w: { nome: "Empatia", desc: "Desenha água no chão que concede cura e escudo aos aliados e lentidão aos inimigos (baseado no AP atual).", img: "icones/habilidades/litlegot/2_hab.jpg" },
+                    e: { nome: "Felicidade", desc: "Desenha luz no mapa, cegando inimigos, os enraizando no chão e concedendo visão aos aliados.", img: "icones/habilidades/litlegot/3_hab.jpg" },
+                    r: { nome: "Paixão", desc: "Pega as duas últimas tintas usadas para mudar totalmente Q, W, E para cores secundárias (Laranja, Verde, Roxo).", img: "icones/habilidades/litlegot/R_hab.jpg" },
+                    
+                    /* SECUNDÁRIAS (Efeitos únicos com nomes de emoções) */
+                    secundarias: {
+                        laranja: { // Fogo + Luz
+                            q: { nome: "Ansiedade", desc: "Aumenta a velocidade de movimento do aliado drasticamente, mas drena vida continuamente enquanto o efeito durar.", img: "icones/habilidades/litlegot/orange_q.jpg" },
+                            w: { nome: "Euforia", desc: "Dispara projéteis rápidos que explodem em área, causando dano adaptativo.", img: "icones/habilidades/litlegot/orange_w.jpg" },
+                            e: { nome: "Coragem", desc: "Cria um escudo ardente em área que reflete todo o dano recebido aos atacantes por 3 segundos.", img: "icones/habilidades/litlegot/orange_e.jpg" }
+                        },
+                        verde: { // Água + Luz
+                            q: { nome: "Inveja", desc: "Rouba temporariamente os atributos de defesa física e mágica do inimigo alvo e os transfere para Litlegot.", img: "icones/habilidades/litlegot/green_q.jpg" },
+                            w: { nome: "Esperança", desc: "Cria uma zona radiante massiva que cura aliados gradualmente e revive as tropas abatidas próximas.", img: "icones/habilidades/litlegot/green_w.jpg" },
+                            e: { nome: "Nojo", desc: "Lança uma poça tóxica que enraíza os inimigos no local e aplica dano contínuo baseado na vida perdida deles.", img: "icones/habilidades/litlegot/green_e.jpg" }
+                        },
+                        roxo: { // Fogo + Água
+                            q: { nome: "Melancolia", desc: "Gera uma névoa densa que reduz severamente o campo de visão dos inimigos atingidos e aplica uma lentidão incapacitante.", img: "icones/habilidades/litlegot/purple_q.jpg" },
+                            w: { nome: "Medo", desc: "Aterroriza os inimigos em formato de cone, forçando-os a fugir na direção oposta enquanto perdem resistência mágica.", img: "icones/habilidades/litlegot/purple_w.jpg" },
+                            e: { nome: "Saudade", desc: "Puxa violentamente os inimigos distantes para o centro de uma área marcada, causando dano em explosão ao se colidirem.", img: "icones/habilidades/litlegot/purple_e.jpg" }
+                        }
+                    }
                 }
             },
             abrax: {
-                id: "abrax", nome: "Abrax", classe: "Lutador / AD", icone: "icones/personagens/abrax.jpeg",
+                nome: "Abrax",
+                classe: "Lutador / AD",
+                icone: "icones/personagens/abrax.jpeg",
                 lore: "Mostre-me o que podes fazer e eu provavelmente farei melhor.",
-                atributos: { ad: 65, ap: 0, df: 35, dm: 32, vm: 600, vda: "0.650", vdm: "345", ah: "0" },
+                atributos: { ad: 65, ap: 0, df: 35, dm: 32, vm: 600, vda: "0.650", vdm: "345", ah: "0", vf: "5%", vmg: "0%", vu: "0%" },
                 skills: {
-                    p: { nome: "A falácia do Apostador", desc: "Vampirismo com base no crítico.", img: "icones/habilidades/abrax/passiva.jpg" },
-                    q: { nome: "Mascarada dos Tolos", desc: "Rouba habilidades.", img: "icones/habilidades/abrax/1_hab.jpg" },
-                    w: { nome: "Honestamente?", desc: "Dash na direção do cursor.", img: "icones/habilidades/abrax/2_hab.jpg" },
-                    e: { nome: "Sobrecarregada", desc: "Empurrão com atordoamento.", img: "icones/habilidades/abrax/3_hab.jpg" },
-                    r: { nome: "No limite", desc: "Status absurdos à beira da morte.", img: "icones/habilidades/abrax/r_hab.jpg" }
+                    p: { nome: "A falácia do Apostador", desc: "O usuário ganha mais vampirismo conforme sua chance de acerto crítico aumenta.", img: "icones/habilidades/abrax/passiva.jpg" },
+                    q: { nome: "Mascarada dos Tolos", desc: "Abre o inventário de habilidades. Q, W e E viram as últimas habilidades roubadas de aliados ou inimigos. O R cancela a ação.", img: "icones/habilidades/abrax/1_hab.jpg" },
+                    w: { nome: "Honestamente?", desc: "Um avanço rápido (Dash) na direção do cursor.", img: "icones/habilidades/abrax/2_hab.jpg" },
+                    e: { nome: "Sobrecarregada", desc: "Um empurrão poderoso que atordoa os inimigos atingidos.", img: "icones/habilidades/abrax/3_hab.jpg" },
+                    r: { nome: "No limite", desc: "Passivo: Quanto menor a vida de Abrax, maiores ficam seus atributos (Dano, Defesas e Velocidade). Ao ficar à beira da morte, seus status alcançam níveis absurdos e imundos, tornando-a quase imparável.", img: "icones/habilidades/abrax/r_hab.jpg" }
                 }
             },
             psique: {
-                id: "psique", nome: "Psique", classe: "Lutador / Mago", icone: "icones/personagens/psique.jpeg",
+                nome: "Psique",
+                classe: "Lutador / Mago",
+                icone: "icones/personagens/psique.jpeg",
                 lore: "Venha abraçar a liberdade que só eu posso lhe dar",
-                atributos: { ad: 55, ap: 10, df: 30, dm: 30, vm: 580, vda: "0.635", vdm: "340", ah: "0" },
+                atributos: { ad: 55, ap: 10, df: 30, dm: 30, vm: 580, vda: "0.635", vdm: "340", ah: "0", vf: "0%", vmg: "0%", vu: "5%" },
                 skills: {
-                    p: { nome: "Parasita Espiritual", desc: "Rouba atributos ao acertar skills.", img: "icones/habilidades/psique/passiva.jpg" },
-                    q: { nome: "Marca Vital", desc: "Ataques curam baseados em crítico.", img: "icones/habilidades/psique/1_hab.jpg" },
-                    w: { nome: "Passo Fantasma", desc: "Invisibilidade e dash.", img: "icones/habilidades/psique/2_hab.jpg" },
-                    e: { nome: "Enxame de Memórias", desc: "Coleta últimas habilidades usadas.", img: "icones/habilidades/psique/3_hab.jpg" },
-                    r: { nome: "Domínio Sombrio", desc: "Área de cura e dano contínuo.", img: "icones/habilidades/psique/r_hab.jpg" }
+                    p: { nome: "Parasita Espiritual", desc: "Rouba atributos, vida e mana dos inimigos ao acertar suas habilidades neles.", img: "icones/habilidades/psique/passiva.jpg" },
+                    q: { nome: "Marca Vital", desc: "Ao marcar um alvo com ataque básico, causar dano a ele cura Psique com base na chance de crítico atual.", img: "icones/habilidades/psique/1_hab.jpg" },
+                    w: { nome: "Passo Fantasma", desc: "Dá um Dash e fica invisível até usar alguma habilidade ou atacar.", img: "icones/habilidades/psique/2_hab.jpg" },
+                    e: { nome: "Enxame de Memórias", desc: "Cria borboletas que coletam as últimas habilidades usadas pelos heróis para ela ou um aliado usar.", img: "icones/habilidades/psique/3_hab.jpg" },
+                    r: { nome: "Domínio Sombrio", desc: "Cria uma área ao redor que cura Psique constantemente enquanto causa dano aos inimigos dentro dela.", img: "icones/habilidades/psique/r_hab.jpg" }
                 }
             }
         };
 
         const dadosRunas = [
-            { id: "runa1", nome: "Até o Último Suspiro", desc: "Vida máx. em risco.", icone: "icones/runas/ultimo_suspiro.jpg" },
-            { id: "runa2", nome: "Desejo de Guerra", desc: "Defesa com base no AD.", icone: "icones/runas/desejo_guerra.jpg" },
-            { id: "runa3", nome: "Gimmi", desc: "Itens baratos, cobra juros.", icone: "icones/runas/gimmi.jpg" }
+            { id: "runa1", nome: "Até o Último Suspiro", desc: "Aumenta a vida máxima conforme ela fica baixa (escalonamento de risco).", icone: "icones/runas/ultimo_suspiro.jpg" },
+            { id: "runa2", nome: "Desejo de Guerra", desc: "Aumenta sua defesa máxima com base no seu ataque (AD) atual.", icone: "icones/runas/desejo_guerra.jpg" },
+            { id: "runa3", nome: "Gimmi", desc: "Itens mais baratos, mas cobra juros no próximo item diminuindo curas e escudos recebidos.", icone: "icones/runas/gimmi.jpg" }
         ];
 
-        // 3. VARIÁVEIS DE ESTADO DO CLIENTE
+        /* =========================================
+           LÓGICA DO SISTEMA
+           ========================================= */
         let campeaoSelecionado = null;
         let runaSelecionada = null;
-        let faseAtualLocal = "";
-        let minhaEquipe = null;
-        let souEspectador = false;
 
-        // Tornar função global para o HTML chamar
-        window.mostrarSkill = function(tecla) {
-            if(!campeaoSelecionado) return;
-            const skill = campeaoSelecionado.skills[tecla];
-            document.getElementById('descricao-skill').innerHTML = `<strong style="color:#c8aa6e;">[${tecla.toUpperCase()}] ${skill.nome}</strong> - ${skill.desc}`;
-        };
-
-        // 4. RENDERIZANDO INTERFACE BASE
-        function renderizarBase() {
-            // Renderiza Campeões
-            const listaDiv = document.getElementById('lista-campeoes');
-            for (const key in dadosCampeoes) {
-                const c = dadosCampeoes[key];
-                const div = document.createElement('div');
-                div.className = 'campeao-icone';
-                div.id = `camp-${key}`;
-                div.style.backgroundImage = `url('${c.icone}')`;
-                div.innerHTML = `<span>${c.nome}</span>`;
-                div.onclick = () => clicarCampeao(key, div);
-                listaDiv.appendChild(div);
+        // Renderizar Lista de Campeões
+        const listaCampeoesDiv = document.getElementById('lista-campeoes');
+        for (const key in dadosCampeoes) {
+            const camp = dadosCampeoes[key];
+            const div = document.createElement('div');
+            div.className = 'campeao-icone';
+            
+            if(camp.icone && camp.icone !== "") {
+                div.style.backgroundImage = `url('${camp.icone}')`;
             }
-            // Renderiza Runas
-            const runasDiv = document.getElementById('lista-runas');
-            dadosRunas.forEach(r => {
-                const div = document.createElement('div');
-                div.className = 'runa';
-                div.innerHTML = `<div class="runa-icone" style="background-image: url('${r.icone}')"></div><div style="font-size:0.7rem;">${r.nome}</div>`;
-                div.onclick = () => {
-                    if (faseAtualLocal === 'selecao') {
-                        runaSelecionada = r.id;
-                        document.querySelectorAll('.runa').forEach(el => el.classList.remove('ativa'));
-                        div.classList.add('ativa');
-                        verificarConfirmacao();
-                    }
-                };
-                runasDiv.appendChild(div);
-            });
+            div.innerHTML = `<span>${camp.nome}</span>`;
+            
+            div.onclick = () => selecionarCampeao(key, div);
+            listaCampeoesDiv.appendChild(div);
         }
 
-        // Interação de Clique no Campeão
-        function clicarCampeao(key, divEl) {
-            if (faseAtualLocal !== 'banimento' && faseAtualLocal !== 'selecao') return;
-            if (divEl.classList.contains('banido')) return;
+        // Renderizar Lista de Runas
+        const listaRunasDiv = document.getElementById('lista-runas');
+        dadosRunas.forEach(runa => {
+            const div = document.createElement('div');
+            div.className = 'runa';
+            div.onclick = () => selecionarRuna(runa.id, div);
+            
+            div.innerHTML = `
+                <div class="runa-icone" style="background-image: ${runa.icone !== '' ? `url('${runa.icone}')` : 'none'}"></div>
+                <div class="runa-titulo">${runa.nome}</div>
+                <div class="runa-desc">${runa.desc}</div>
+            `;
+            listaRunasDiv.appendChild(div);
+        });
 
+        // Função ao clicar num campeão
+        function selecionarCampeao(key, elementoHtml) {
             campeaoSelecionado = dadosCampeoes[key];
+            
             document.querySelectorAll('.campeao-icone').forEach(el => el.classList.remove('ativo'));
-            divEl.classList.add('ativo');
+            elementoHtml.classList.add('ativo');
             
             document.getElementById('painel-detalhes').style.display = 'block';
+
             document.getElementById('nome-campeao').innerText = campeaoSelecionado.nome;
             document.getElementById('classe-campeao').innerText = campeaoSelecionado.classe;
             document.getElementById('lore-campeao').innerText = campeaoSelecionado.lore;
-            
-            ['ad','ap','df','dm','vm','vda','vdm','ah'].forEach(attr => {
-                document.getElementById(`attr-${attr}`).innerText = campeaoSelecionado.atributos[attr];
-            });
 
-            ['p','q','w','e','r'].forEach(t => {
-                const btn = document.getElementById(`icone-${t}`);
-                btn.style.backgroundImage = `url('${campeaoSelecionado.skills[t].img}')`;
-                btn.innerText = "";
-            });
-            verificarConfirmacao();
-        }
+            const attr = campeaoSelecionado.atributos;
+            document.getElementById('attr-ad').innerText = attr.ad;
+            document.getElementById('attr-ap').innerText = attr.ap;
+            document.getElementById('attr-df').innerText = attr.df;
+            document.getElementById('attr-dm').innerText = attr.dm;
+            document.getElementById('attr-vm').innerText = attr.vm;
+            document.getElementById('attr-vda').innerText = attr.vda;
+            document.getElementById('attr-vdm').innerText = attr.vdm;
+            document.getElementById('attr-ah').innerText = attr.ah;
+            document.getElementById('attr-vf').innerText = attr.vf;
+            document.getElementById('attr-vmg').innerText = attr.vmg;
+            document.getElementById('attr-vu').innerText = attr.vu;
 
-        // Verifica se o botão Confirmar deve ser habilitado
-        function verificarConfirmacao() {
-            const btn = document.getElementById('btn-confirmar');
-            const rota = document.getElementById('select-rota').value;
-            
-            if (faseAtualLocal === 'banimento') {
-                btn.innerText = "Confirmar Banimento";
-                btn.disabled = !campeaoSelecionado;
-            } else if (faseAtualLocal === 'selecao') {
-                btn.innerText = "Confirmar Escolha";
-                btn.disabled = !(campeaoSelecionado && runaSelecionada && rota !== "");
-            } else {
-                btn.disabled = true;
-            }
-        }
-
-        document.getElementById('select-rota').addEventListener('change', verificarConfirmacao);
-
-        // 5. LÓGICA DE SERVIDOR (Sincronizando com Firebase)
-        const salaRef = ref(db, 'salas/' + idSala);
-
-        // Divisão Inicial Justa (Somente o Host/Primeiro player a entrar processa isso)
-        async function verificarDivisao() {
-            const snapshot = await get(salaRef);
-            if (!snapshot.exists() || snapshot.val().fase === 'lobby') {
-                // Simulação: Pegando os players do "Lobby"
-                // No seu código real, você buscaria do nó "Lobby" do firebase
-                const mockPlayers = [
-                    { uid: meuUID, nome: meuNome },
-                    { uid: 'uid_1', nome: 'Jogador 1' },
-                    { uid: 'uid_2', nome: 'Jogador 2' },
-                    // { uid: 'uid_3', nome: 'Jogador 3' } // Impar = espectador
-                ];
-
-                // Mistura e Divide
-                const embaralhados = mockPlayers.sort(() => 0.5 - Math.random());
-                let espectador = null;
-                if (embaralhados.length % 2 !== 0) {
-                    espectador = embaralhados.pop();
-                }
-                const meio = Math.floor(embaralhados.length / 2);
+            // Carregar habilidades principais
+            ['p', 'q', 'w', 'e', 'r'].forEach(tecla => {
+                const imgSkill = campeaoSelecionado.skills[tecla].img;
+                const btnSkill = document.getElementById(`icone-${tecla}`);
                 
-                let estruturaJogadores = {};
-                embaralhados.slice(0, meio).forEach(p => {
-                    estruturaJogadores[p.uid] = { nome: p.nome, equipe: 'azul', campeao: '', rota: '', status: 'aguardando' };
-                });
-                embaralhados.slice(meio).forEach(p => {
-                    estruturaJogadores[p.uid] = { nome: p.nome, equipe: 'vermelha', campeao: '', rota: '', status: 'aguardando' };
-                });
-
-                await set(salaRef, {
-                    fase: 'banimento',
-                    tempoRESTANTE: 30, // 30s para bans
-                    jogadores: estruturaJogadores,
-                    bans: { azul: "", vermelha: "" },
-                    espectador: espectador ? espectador.uid : null,
-                    host: meuUID
-                });
-                iniciarTimerServidor();
-            }
-        }
-
-        // Gerenciador de Tempo (Apenas o Host executa para evitar dessincronização)
-        let timerInterval;
-        function iniciarTimerServidor() {
-            timerInterval = setInterval(async () => {
-                const snap = await get(salaRef);
-                let dados = snap.val();
-                if (dados.host !== meuUID) return; // Só o host diminui o tempo
-
-                if (dados.tempoRESTANTE > 0) {
-                    update(salaRef, { tempoRESTANTE: dados.tempoRESTANTE - 1 });
+                if(imgSkill && imgSkill !== "") {
+                    btnSkill.style.backgroundImage = `url('${imgSkill}')`;
+                    btnSkill.innerText = "";
                 } else {
-                    // Transição de Fases
-                    if (dados.fase === 'banimento') {
-                        update(salaRef, { fase: 'selecao', tempoRESTANTE: 60 }); // 60s pra pick
-                    } else if (dados.fase === 'selecao') {
-                        update(salaRef, { fase: 'carregando', tempoRESTANTE: 0 });
-                        clearInterval(timerInterval);
-                    }
-                }
-            }, 1000);
-        }
-
-        // Ouvinte em Tempo Real do Firebase
-        onValue(salaRef, (snapshot) => {
-            const dados = snapshot.val();
-            if (!dados) return;
-
-            faseAtualLocal = dados.fase;
-            document.getElementById('tempo-restante').innerText = dados.tempoRESTANTE;
-
-            // Determinar o papel do jogador local
-            if (dados.espectador === meuUID) {
-                souEspectador = true;
-                document.getElementById('select-rota').disabled = true;
-                document.getElementById('btn-confirmar').style.display = 'none';
-            } else if (dados.jogadores[meUID]) {
-                minhaEquipe = dados.jogadores[meuUID].equipe;
-            }
-
-            // Atualiza Top Bar
-            const statusFase = document.getElementById('status-fase');
-            if (faseAtualLocal === 'banimento') statusFase.innerText = "Fase de Banimentos";
-            else if (faseAtualLocal === 'selecao') statusFase.innerText = "Escolha seu Campeão";
-            else if (faseAtualLocal === 'carregando') {
-                statusFase.innerText = "Iniciando Partida...";
-                setTimeout(() => { window.location.href = "../partida/loading.html"; }, 2000);
-            }
-
-            // Atualiza Listas de Times e UI Visual
-            renderizarJogadores(dados);
-            processarBansEBloqueios(dados);
-            verificarConfirmacao();
-        });
-
-        function renderizarJogadores(dados) {
-            const containerAzul = document.getElementById('jogadores-azul');
-            const containerVermelho = document.getElementById('jogadores-vermelho');
-            containerAzul.innerHTML = ''; containerVermelho.innerHTML = '';
-
-            for (const uid in dados.jogadores) {
-                const j = dados.jogadores[uid];
-                const div = document.createElement('div');
-                div.className = 'jogador-card';
-                
-                const miniatura = j.campeao ? `style="background-image: url('${dadosCampeoes[j.campeao].icone}')"` : '';
-                
-                div.innerHTML = `
-                    <div class="jogador-nome">${uid === meuUID ? `> ${j.nome}` : j.nome}</div>
-                    <div class="jogador-funcao">${j.rota || 'Escolhendo Rota...'}</div>
-                    <div class="jogador-status">${j.status}</div>
-                    <div class="campeao-mini" ${miniatura}></div>
-                `;
-
-                if (j.equipe === 'azul') containerAzul.appendChild(div);
-                else containerVermelho.appendChild(div);
-            }
-
-            // Espectador
-            if (dados.espectador) {
-                document.getElementById('box-espectador').style.display = 'block';
-                // Assumindo que o ID do espectador seja renderizado como nome por simplificação
-                document.getElementById('nome-espectador').innerText = dados.espectador === meuUID ? "(Você)" : "Assistindo";
-            }
-        }
-
-        function processarBansEBloqueios(dados) {
-            // Reseta bloqueios visuais
-            document.querySelectorAll('.campeao-icone').forEach(el => el.classList.remove('banido'));
-
-            // Mostra bans nos slots
-            ['azul', 'vermelha'].forEach(eq => {
-                const containerId = eq === 'azul' ? 'bans-azul' : 'bans-vermelho';
-                const ban = dados.bans[eq];
-                document.getElementById(containerId).innerHTML = ban 
-                    ? `<div class="ban-slot" style="background-image: url('${dadosCampeoes[ban].icone}')" title="Banido pelo time ${eq}"></div>`
-                    : `<div class="ban-slot"></div>`;
-
-                if (ban) {
-                    const iconeBanido = document.getElementById(`camp-${ban}`);
-                    if (iconeBanido) iconeBanido.classList.add('banido');
+                    btnSkill.style.backgroundImage = "none";
+                    btnSkill.innerText = tecla.toUpperCase();
                 }
             });
 
-            // Bloqueia seleções já feitas (Picks únicos)
-            for (const uid in dados.jogadores) {
-                const c = dados.jogadores[uid].campeao;
-                if (c && dados.jogadores[uid].status === 'confirmado') {
-                    const icone = document.getElementById(`camp-${c}`);
-                    if(icone) {
-                        icone.classList.add('banido'); // Usa a classe banido para bloquear visualmente
-                        icone.style.borderColor = dados.jogadores[uid].equipe === 'azul' ? '#005a82' : '#820000';
-                    }
+            // Gerar Habilidades Secundárias se o campeão tiver (ex: Litlegot)
+            const secContainer = document.getElementById('habilidades-secundarias');
+            secContainer.innerHTML = '';
+            
+            if (campeaoSelecionado.skills.secundarias) {
+                secContainer.style.display = 'block';
+                
+                for (const cor in campeaoSelecionado.skills.secundarias) {
+                    let nomeCor = cor.charAt(0).toUpperCase() + cor.slice(1);
+                    // Definindo as cores hexadecimais para as bordas das skills
+                    let colorCode = cor === 'laranja' ? '#ff9900' : (cor === 'verde' ? '#33cc33' : '#9933cc');
+                    
+                    let htmlSecundaria = `
+                    <div style="margin-bottom: 10px;">
+                        <h4 style="font-size: 0.85rem; color: ${colorCode}; text-align: left; margin-bottom: 5px;">Forma Secundária: ${nomeCor}</h4>
+                        <div class="icones-habilidades">`;
+                    
+                    ['q', 'w', 'e'].forEach(tecla => {
+                        const skillSec = campeaoSelecionado.skills.secundarias[cor][tecla];
+                        const temImg = skillSec.img && skillSec.img !== "";
+                        const bgStyle = temImg ? `background-image: url('${skillSec.img}'); color: transparent;` : "";
+                        
+                        htmlSecundaria += `
+                            <div class="skill-icone" 
+                                 style="border-color: ${colorCode}; ${bgStyle}" 
+                                 onmouseover="mostrarSkillSecundaria('${cor}', '${tecla}')">
+                                 ${tecla.toUpperCase()}
+                            </div>`;
+                    });
+                    
+                    htmlSecundaria += `</div></div>`;
+                    secContainer.innerHTML += htmlSecundaria;
                 }
+            } else {
+                secContainer.style.display = 'none';
             }
+
+            document.getElementById('descricao-skill').innerHTML = "Passe o mouse sobre uma habilidade para ver a descrição.";
         }
 
-        // 6. AÇÃO DO BOTÃO PRINCIPAL (Banir ou Pickar)
+        // Mostrar habilidade principal no hover
+        function mostrarSkill(tecla) {
+            if(!campeaoSelecionado) return;
+            const skill = campeaoSelecionado.skills[tecla];
+            document.getElementById('descricao-skill').innerHTML = `
+                <strong style="color:#c8aa6e;">[${tecla.toUpperCase()}] ${skill.nome}</strong><br><br>
+                ${skill.desc}
+            `;
+        }
+
+        // Mostrar habilidade secundária no hover
+        function mostrarSkillSecundaria(cor, tecla) {
+            if(!campeaoSelecionado || !campeaoSelecionado.skills.secundarias) return;
+            const skill = campeaoSelecionado.skills.secundarias[cor][tecla];
+            let colorCode = cor === 'laranja' ? '#ff9900' : (cor === 'verde' ? '#33cc33' : '#9933cc');
+            
+            document.getElementById('descricao-skill').innerHTML = `
+                <strong style="color:${colorCode};">[${tecla.toUpperCase()} - FORMA ${cor.toUpperCase()}] ${skill.nome}</strong><br><br>
+                ${skill.desc}
+            `;
+        }
+
+        // Selecionar Runa
+        function selecionarRuna(id, elementoHtml) {
+            runaSelecionada = id;
+            document.querySelectorAll('.runa').forEach(el => el.classList.remove('ativa'));
+            elementoHtml.classList.add('ativa');
+        }
+
+        // Botão Confirmar
         document.getElementById('btn-confirmar').onclick = () => {
-            if (souEspectador || !campeaoSelecionado) return;
-
-            if (faseAtualLocal === 'banimento') {
-                // Registrar Ban no time correspondente
-                const updates = {};
-                updates[`bans/${minhaEquipe}`] = campeaoSelecionado.id;
-                update(salaRef, updates);
-                
-                // Limpar seleção local
-                campeaoSelecionado = null;
-                document.getElementById('btn-confirmar').disabled = true;
-
-            } else if (faseAtualLocal === 'selecao') {
-                // Registrar Escolha e Rota do Jogador
-                const rotaEscolhida = document.getElementById('select-rota').value;
-                const updates = {};
-                updates[`jogadores/${meuUID}/campeao`] = campeaoSelecionado.id;
-                updates[`jogadores/${meuUID}/runa`] = runaSelecionada;
-                updates[`jogadores/${meuUID}/rota`] = rotaEscolhida;
-                updates[`jogadores/${meuUID}/status`] = "confirmado";
-                update(salaRef, updates);
-
-                // Bloqueia UI pro jogador
-                document.getElementById('btn-confirmar').disabled = true;
-                document.getElementById('btn-confirmar').innerText = "Aguardando outros...";
-                document.getElementById('select-rota').disabled = true;
+            if(!campeaoSelecionado) {
+                alert("Por favor, selecione um campeão primeiro!");
+                return;
             }
-        };
-
-        // Inicialização
-        window.onload = () => {
-            renderizarBase();
-            verificarDivisao(); // Tenta configurar a sala se for o primeiro a entrar
+            if(!runaSelecionada) {
+                alert("Não esqueça de selecionar sua Runa!");
+                return;
+            }
+            alert(`Sua partida vai começar!\nCampeão: ${campeaoSelecionado.nome}\nRuna Escolhida: ${dadosRunas.find(r => r.id === runaSelecionada).nome}`);
         };
     </script>
 </body>
