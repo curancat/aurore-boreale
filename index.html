@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurore Boreale - Account</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0c;
+            background-image: radial-gradient(circle at center, #0a1428 0%, #09090b 100%);
+            font-family: 'Beaufort for LOL', 'Cinzel', serif;
+            color: #c8aa6e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .titulo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .titulo h1 {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            color: #f0e6d2;
+            text-shadow: 0 0 15px rgba(200, 170, 110, 0.6);
+        }
+
+        .titulo h2 {
+            font-size: 1.2rem;
+            font-family: 'Roboto', sans-serif;
+            color: #a09b8c;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        /* Containers de formulário */
+        .navegation, .navegation-loggin, .navegation-cadastro {
+            background: rgba(1, 10, 19, 0.85);
+            border: 1px solid #785a28;
+            box-shadow: 0 0 20px rgba(200, 170, 110, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            margin: 10px;
+            width: 380px;
+            border-radius: 2px;
+            text-align: center;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Oculta elementos que usam esta classe */
+        .escondido {
+            display: none !important;
+        }
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .navegation nav {
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #1e2328, #0a0a0c);
+            border: 2px solid #c8aa6e;
+            color: #f0e6d2;
+            padding: 12px 25px;
+            font-family: 'Beaufort for LOL', 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .navegation button {
+            width: 45%;
+        }
+
+        button:hover, .btn-ativo {
+            background: linear-gradient(to bottom, #2b3137, #1e2328);
+            border-color: #f0e6d2;
+            box-shadow: 0 0 15px rgba(200, 170, 110, 0.8);
+            text-shadow: 0 0 5px #c8aa6e;
+        }
+
+        input {
+            background: #010a13;
+            border: 1px solid #463714;
+            color: #f0e6d2;
+            padding: 15px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        input:focus {
+            border-color: #c8aa6e;
+            box-shadow: 0 0 10px rgba(200, 170, 110, 0.5);
+        }
+
+        input::placeholder {
+            color: #5c5b57;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="titulo">
+        <header>
+            <h1>Aurore Boreale</h1>
+            <h2>A grande balança do universo</h2>
+        </header>
+    </div>
+
+    <!-- Menu de navegação -->
+    <div class="navegation">
+        <nav>
+            <button class="loggin btn-ativo" id="btn-menu-login">Login</button>
+            <button class="cadastro" id="btn-menu-cadastro">Cadastro</button>
+        </nav>
+    </div>
+    
+    <!-- Tela de Login -->
+    <div class="navegation-loggin" id="tela-login">
+        <nav>
+            <input id="email-login" class="input-email" placeholder="Insira seu email" type="email">
+            <input id="senha-login" class="input-senha" placeholder="Insira sua senha" type="password">
+            <button id="btn-submit-login" class="loggin-button">Entrar</button>
+        </nav>
+    </div>
+
+    <!-- Tela de Cadastro -->
+    <div class="navegation-cadastro escondido" id="tela-cadastro">
+        <nav>
+            <input id="name-cadastro" class="input-name" placeholder="Insira seu nome de jogador" type="text">
+            <input id="email-cadastro" class="input-email" placeholder="Insira seu email" type="email">
+            <input id="senha-cadastro" class="input-senha" placeholder="Crie uma senha" type="password">
+            <button id="btn-submit-cadastro" class="cadastro-button">Registrar</button>
+        </nav>
+    </div>
+    
+    <!-- SCRIPT TIPO MÓDULO PARA CONECTAR AO SERVIDOR -->
+    <script type="module">
+        // 1. Importando o Servidor Firebase e as Funções de Autenticação
+        import { auth } from './backend/firebase-config.js';
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        // 2. Mapeando as "telas" (divs de formulário) e botões de menu
+        const btnMenuLogin = document.getElementById('btn-menu-login');
+        const btnMenuCadastro = document.getElementById('btn-menu-cadastro');
+        const telaLogin = document.getElementById('tela-login');
+        const telaCadastro = document.getElementById('tela-cadastro');
+
+        // Alternar para tela de Cadastro
+        btnMenuCadastro.addEventListener('click', function() {
+            telaLogin.classList.add('escondido');
+            telaCadastro.classList.remove('escondido');
+            btnMenuCadastro.classList.add('btn-ativo');
+            btnMenuLogin.classList.remove('btn-ativo');
+        });
+
+        // Alternar para tela de Login
+        btnMenuLogin.addEventListener('click', function() {
+            telaCadastro.classList.add('escondido');
+            telaLogin.classList.remove('escondido');
+            btnMenuLogin.classList.add('btn-ativo');
+            btnMenuCadastro.classList.remove('btn-ativo');
+        });
+
+        // 3. LÓGICA DE LOGIN COM O FIREBASE
+        const btnSubmitLogin = document.getElementById('btn-submit-login');
+        btnSubmitLogin.addEventListener('click', () => {
+            const email = document.getElementById('email-login').value;
+            const senha = document.getElementById('senha-login').value;
+
+            if(!email || !senha) {
+                alert("Preencha todos os campos para entrar!");
+                return;
+            }
+
+            // Tentativa de login no servidor
+            signInWithEmailAndPassword(auth, email, senha)
+                .then((userCredential) => {
+                    // Login com sucesso!
+                    console.log("Logado como:", userCredential.user.email);
+                    // Redireciona o jogador para a página do Client (Lobby)
+                    window.location.href = './client/lobby.html';
+                })
+                .catch((error) => {
+                    alert("Erro ao fazer login. Verifique seu email e senha.");
+                    console.error("Erro Firebase:", error.code, error.message);
+                });
+        });
+
+        // 4. LÓGICA DE CADASTRO COM O FIREBASE
+        const btnSubmitCadastro = document.getElementById('btn-submit-cadastro');
+        btnSubmitCadastro.addEventListener('click', () => {
+            const nome = document.getElementById('name-cadastro').value;
+            const email = document.getElementById('email-cadastro').value;
+            const senha = document.getElementById('senha-cadastro').value;
+
+            if(!nome || !email || !senha) {
+                alert("Preencha todos os campos para se registrar!");
+                return;
+            }
+
+            if(senha.length < 6) {
+                alert("A senha deve ter pelo menos 6 caracteres!");
+                return;
+            }
+
+            // Criar conta no servidor
+            createUserWithEmailAndPassword(auth, email, senha)
+                .then((userCredential) => {
+                    // Salvar o "Nome de Jogador" no perfil dele
+                    updateProfile(userCredential.user, {
+                        displayName: nome
+                    }).then(() => {
+                        alert("Conta criada com sucesso! Bem-vindo, " + nome);
+                        // Redireciona para o Client (Lobby)
+                        window.location.href = './client/lobby.html';
+                    });
+                })
+                .catch((error) => {
+                    alert("Erro ao criar conta. Talvez o email já esteja em uso.");
+                    console.error("Erro Firebase:", error.code, error.message);
+                });
+        });
+    </script>
+</body>
+</html>
