@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summoner's Rift - Classic RPG Client</title>
+    <title>Summoner's Rift RPG - Hextech Client</title>
     <style>
         /* =========================================
-           TEMA HEXTECH, ANIMAÇÕES E CURSOR
+           TEMA HEXTECH & CURSOR CUSTOMIZADO
            ========================================= */
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@400;500;700&display=swap');
 
         :root {
             --gold: #C8AA6E;
@@ -19,13 +19,13 @@
             --blue-magic: #005A82;
             --bg-color: #010A13;
             --border-color: #463714;
-            --health-color: #2ecc71;
+            --red-team: #c0392b;
+            --blue-team: #2980b9;
         }
 
-        /* Cursor Personalizado para todo o site */
+        /* Cursor Customizado do LoL */
         * {
             cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), auto !important;
-            box-sizing: border-box;
         }
 
         @keyframes pulseGlow {
@@ -39,336 +39,384 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes bgFloat {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100vh;
             background-color: var(--bg-color);
             background-image: radial-gradient(circle at center, #0a1428 0%, #010a13 100%);
-            background-size: 200% 200%;
-            animation: bgFloat 20s ease infinite;
             font-family: 'Roboto', sans-serif; color: var(--gold-light);
-            overflow: hidden; user-select: none;
+            overflow: hidden;
         }
 
-        /* BOTÕES GERAIS */
+        /* Classes de Controle de Telas */
+        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .screen.active { display: flex; animation: fadeIn 0.5s ease; }
+
+        /* --- BOTÕES GERAIS --- */
         .btn {
             background: linear-gradient(to bottom, #1E2328, #0A1428); border: 1px solid var(--gold);
-            color: var(--gold); padding: 12px 20px; cursor: pointer;
-            font-family: 'Cinzel', serif; font-weight: bold; text-transform: uppercase;
-            transition: 0.3s; letter-spacing: 1px;
+            color: var(--gold); padding: 12px 20px; font-family: 'Cinzel', serif; font-weight: bold;
+            text-transform: uppercase; transition: 0.3s; letter-spacing: 1px; text-align: center;
         }
         .btn:hover { background: var(--gold); color: var(--bg-color); box-shadow: 0 0 15px var(--gold); }
 
         /* --- TELA DE LOGIN --- */
-        #login-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center; z-index: 100;
-            background: rgba(1, 10, 19, 0.95); backdrop-filter: blur(5px); transition: opacity 0.5s ease;
-        }
-        .login-box {
-            background: linear-gradient(135deg, rgba(10,20,40,0.9) 0%, rgba(1,10,19,0.9) 100%);
-            border: 2px solid var(--gold-dark); padding: 40px; width: 320px; text-align: center;
-            animation: pulseGlow 4s infinite;
-        }
-        .login-box h1 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 30px; font-size: 26px; text-shadow: 0 0 10px var(--gold-dark); }
+        #login-screen { justify-content: center; align-items: center; background: rgba(1, 10, 19, 0.95); z-index: 100; }
+        .login-box { background: linear-gradient(135deg, rgba(10,20,40,0.9), rgba(1,10,19,0.9)); border: 2px solid var(--gold-dark); padding: 40px; width: 320px; text-align: center; animation: pulseGlow 4s infinite; }
+        .login-box h1 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 30px; font-size: 26px; text-transform: uppercase; }
         .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; color: var(--gold-dark); margin-bottom: 5px; font-weight: bold; }
-        .input-group input { width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--gold-light); outline: none; transition: 0.3s; }
+        .input-group label { display: block; font-size: 12px; color: var(--gold-dark); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        .input-group input { width: calc(100% - 22px); padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--gold-light); outline: none; transition: 0.3s; }
         .input-group input:focus { border-color: var(--gold); box-shadow: 0 0 10px var(--gold-dark); }
 
-        /* --- CLIENTE PRINCIPAL --- */
-        #main-client { display: none; width: 100%; height: 100%; flex-direction: column; }
+        /* --- TELA DE LOBBY --- */
+        #lobby-screen { flex-direction: column; padding: 40px; background: url('https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Azir_0.jpg') center/cover; }
+        .lobby-container { background: rgba(1, 10, 19, 0.85); border: 2px solid var(--gold-dark); flex: 1; display: flex; flex-direction: column; padding: 20px; backdrop-filter: blur(10px); }
+        .lobby-header { font-family: 'Cinzel', serif; font-size: 24px; color: var(--gold); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .players-list { display: flex; flex-wrap: wrap; gap: 15px; flex: 1; align-content: flex-start; }
+        .player-card { background: rgba(10,20,40,0.8); border: 1px solid var(--gold-dark); padding: 15px; min-width: 150px; text-align: center; }
+        .player-card.red { border-color: var(--red-team); box-shadow: 0 0 10px rgba(192, 57, 43, 0.5); }
+        .player-card.blue { border-color: var(--blue-team); box-shadow: 0 0 10px rgba(41, 128, 185, 0.5); }
 
-        .topbar {
-            height: 60px; background: linear-gradient(to right, rgba(1,10,19,1), rgba(10,20,40,0.9));
-            border-bottom: 2px solid var(--gold-dark); display: flex; align-items: center; padding: 0 20px; justify-content: space-between;
-        }
-        .nav-tabs { display: flex; gap: 20px; }
-        .tab-btn {
-            background: none; border: none; color: var(--gold-dark); font-family: 'Cinzel', serif;
-            font-size: 15px; font-weight: bold; cursor: pointer; padding: 15px 10px;
-            text-transform: uppercase; border-bottom: 2px solid transparent; transition: 0.3s;
-        }
-        .tab-btn:hover { color: var(--gold-light); }
-        .tab-btn.active { color: var(--gold); border-bottom: 2px solid var(--gold); text-shadow: 0 0 10px var(--gold); }
-        
-        .player-info { display: flex; gap: 15px; font-family: 'Cinzel', serif; color: var(--gold); font-size: 14px; }
-        .player-info span { background: rgba(0,0,0,0.5); padding: 5px 15px; border: 1px solid var(--gold-dark); border-radius: 4px; }
-
-        .content-area { flex: 1; position: relative; overflow: hidden; }
-        .view-section { display: none; width: 100%; height: 100%; padding: 20px; animation: fadeIn 0.4s ease; }
-        .view-section.active { display: flex; }
-
-        /* --- ABA: SELEÇÃO DE CAMPEÕES --- */
-        #view-select { flex-direction: row; gap: 20px; }
-        .roster-container { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); padding: 20px; overflow-y: auto; }
-        .roster-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-        .champ-icon-btn {
-            width: 80px; height: 80px; background-color: #000; border: 2px solid var(--border-color);
-            position: relative; overflow: hidden; transition: 0.3s; display: flex; justify-content: center; align-items: center; text-align: center; font-size: 10px;
-        }
-        .champ-icon-btn img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0.7; transition: 0.3s; }
+        /* --- TELA DE SELEÇÃO DE CAMPEÕES --- */
+        #champ-select-screen { flex-direction: column; background: radial-gradient(circle at top left, rgba(10,20,40,0.9) 0%, rgba(1,10,19,1) 100%); }
+        .cs-header { text-align: center; padding: 15px; font-family: 'Cinzel', serif; color: var(--gold); font-size: 24px; border-bottom: 1px solid var(--gold-dark); }
+        .cs-content { display: flex; flex: 1; padding: 20px; gap: 20px; }
+        .roster { flex: 2; display: flex; gap: 15px; flex-wrap: wrap; align-content: flex-start; }
+        .champ-icon-btn { width: 80px; height: 80px; border: 2px solid var(--border-color); position: relative; display: flex; justify-content: center; align-items: center; color: var(--gold-dark); font-size: 11px; background: #000; overflow: hidden; }
+        .champ-icon-btn img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 0.3s; }
         .champ-icon-btn:hover img, .champ-icon-btn.selected img { opacity: 1; }
-        .champ-icon-btn.selected { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 15px var(--gold); z-index: 2; }
+        .champ-icon-btn.selected { border-color: var(--gold); transform: scale(1.05); box-shadow: 0 0 15px var(--gold); }
+        .champ-details { flex: 1; background: rgba(10,20,40,0.8); border: 1px solid var(--gold-dark); padding: 20px; display: flex; flex-direction: column; }
+        .champ-name { font-family: 'Cinzel', serif; font-size: 32px; color: var(--gold); margin: 0; }
+        .lock-in-btn { margin-top: auto; padding: 15px; font-size: 18px; }
+
+        /* --- TELA IN-GAME (RPG & CHAT) --- */
+        #in-game-screen { display: flex; flex-direction: row; }
         
-        .champ-details { flex: 2; background: rgba(10,20,40,0.6); border: 1px solid var(--gold-dark); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
-        .champ-header h2 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0; font-size: 32px; }
-        .champ-header .quote { font-style: italic; color: var(--blue-light); margin-top: 10px; padding-left: 10px; border-left: 2px solid var(--gold); }
-        .abilities-container { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .ability { display: flex; gap: 15px; background: rgba(0,0,0,0.5); padding: 10px; border: 1px solid rgba(200, 170, 110, 0.2); }
-        .ability-icon { width: 50px; height: 50px; border: 1px solid var(--gold); position: relative; flex-shrink: 0; }
-        .ability-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .ability-icon .key { position: absolute; bottom: -5px; right: -5px; background: #000; color: var(--gold); font-size: 10px; padding: 2px 5px; border: 1px solid var(--gold); }
-        .ability-info h4 { margin: 0 0 5px 0; color: var(--gold-light); font-family: 'Cinzel', serif;}
-        .ability-info p { margin: 0; font-size: 13px; color: #A09B8C; }
+        /* Painel do Personagem (Esquerda) */
+        .char-panel { width: 350px; background: linear-gradient(180deg, rgba(10,20,40,0.95), rgba(1,10,19,0.95)); border-right: 2px solid var(--gold-dark); display: flex; flex-direction: column; overflow-y: auto; }
+        .char-portrait { width: 100%; height: 200px; background: #000; position: relative; border-bottom: 2px solid var(--gold); }
+        .char-portrait img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .char-portrait .level-badge { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; background: var(--bg-color); border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: 'Cinzel'; }
+        
+        /* Barras de Status */
+        .status-bars { padding: 20px; }
+        .bar-container { background: #000; height: 18px; border: 1px solid var(--border-color); margin-bottom: 10px; position: relative; }
+        .bar-fill { height: 100%; transition: width 0.3s; }
+        .bar-hp { background: linear-gradient(90deg, #8b0000, #ff4c4c); width: 100%; }
+        .bar-mana { background: linear-gradient(90deg, #00008b, #4c4cff); width: 100%; }
+        .bar-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 11px; line-height: 18px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
 
-        /* --- ABA: VISÃO DO CAMPEÃO (SPLASH ART) --- */
-        #view-display { position: relative; justify-content: center; align-items: flex-end; padding: 0; background: #000;}
-        .splash-art { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 1s ease-in-out; }
-        .splash-vignette { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 20%, #010A13 90%); }
-        .display-info { position: relative; z-index: 10; text-align: center; margin-bottom: 50px; text-shadow: 0 5px 15px #000; animation: fadeIn 1s ease; }
-        .display-info h1 { font-family: 'Cinzel', serif; font-size: 60px; color: var(--gold); margin: 0; text-transform: uppercase; letter-spacing: 5px; }
-        .display-info h3 { font-size: 20px; color: var(--gold-light); margin: 5px 0 0 0; font-weight: 300; letter-spacing: 2px; }
+        /* Atributos Grid */
+        .attributes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; }
+        .attr-item { display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 5px; border: 1px solid #2a2a2a; font-size: 12px; }
+        .attr-item img { width: 16px; height: 16px; margin-right: 8px; filter: sepia(1) hue-rotate(10deg); }
+        .attr-item span { color: var(--gold-light); font-weight: bold; }
 
-        /* --- ABA: ARENA / CHAT RPG --- */
-        #view-chat { flex-direction: column; align-items: center; justify-content: center; }
-        .chat-wrapper { width: 80%; height: 90%; display: flex; flex-direction: column; background: rgba(0,0,0,0.8); border: 2px solid var(--gold-dark); box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        .chat-header-rooms { display: flex; background: rgba(10,20,40,0.9); border-bottom: 1px solid var(--gold-dark); }
-        .room-btn { flex: 1; padding: 15px; background: none; border: none; color: var(--gold-dark); cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: 0.3s; }
-        .room-btn.active { color: var(--gold); background: rgba(200, 170, 110, 0.1); border-bottom: 2px solid var(--gold); }
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .message { font-size: 15px; padding: 8px 12px; background: rgba(255,255,255,0.03); border-left: 2px solid transparent; }
-        .msg-sys { color: var(--gold-dark); font-style: italic; border-left-color: var(--gold-dark); }
+        /* Inventário */
+        .inventory-section { padding: 20px; }
+        .inv-title { font-family: 'Cinzel'; color: var(--gold); font-size: 14px; text-transform: uppercase; margin-bottom: 10px; text-align: center; border-bottom: 1px solid var(--gold-dark); }
+        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+        .inv-slot { aspect-ratio: 1; background: rgba(0,0,0,0.6); border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 10px; color: #555; }
+        .trinket-slot { grid-column: span 3; height: 30px; margin-top: 5px; background: rgba(0,0,0,0.6); border: 1px solid var(--gold-dark); text-align: center; line-height: 30px; font-size: 12px; }
+
+        /* Painel Central (Ações de RPG) */
+        .action-panel { flex: 1; display: flex; flex-direction: column; background: rgba(1, 10, 19, 0.8); position: relative; }
+        .action-header { padding: 15px; background: rgba(10,20,40,0.9); border-bottom: 1px solid var(--border-color); text-align: center; font-family: 'Cinzel'; color: var(--gold); }
+        .rpg-map { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .action-card { background: rgba(0,0,0,0.6); border: 1px solid var(--gold-dark); padding: 20px; text-align: center; transition: 0.3s; }
+        .action-card:hover { border-color: var(--gold); background: rgba(10,20,40,0.6); transform: translateY(-3px); }
+        .action-card h3 { margin: 0 0 10px 0; color: var(--blue-light); font-family: 'Cinzel'; }
+        
+        .target-list { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+        .target-btn { background: #111; border: 1px solid var(--border-color); color: #FFF; padding: 8px 15px; transition: 0.3s; }
+        .target-btn:hover { background: var(--red-team); border-color: #ff4c4c; }
+
+        /* Painel de Chat (Direita - A Partida) */
+        .chat-container { width: 400px; display: flex; flex-direction: column; background: rgba(1, 10, 19, 0.95); border-left: 2px solid var(--gold-dark); }
+        .chat-header { padding: 15px; background: linear-gradient(180deg, rgba(10,20,40,0.9) 0%, rgba(1,10,19,0) 100%); font-family: 'Cinzel', serif; color: var(--gold); text-align: center; border-bottom: 1px solid var(--border-color); }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        .message { padding: 8px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 3px solid transparent; }
+        .msg-sys { color: var(--gold-dark); font-style: italic; border-left-color: var(--gold-dark); text-align: center; }
+        .msg-combat { color: #ff4c4c; background: rgba(255, 76, 76, 0.05); border-left-color: var(--red-team); }
+        .msg-farm { color: #2ecc71; background: rgba(46, 204, 113, 0.05); border-left-color: #2ecc71; }
         .msg-user { color: var(--gold-light); border-left-color: var(--blue-magic); }
         .msg-name { color: var(--gold); font-weight: bold; }
-        .chat-input-area { display: flex; padding: 15px; background: rgba(10,20,40,0.9); border-top: 1px solid var(--border-color); }
-        #chat-input { flex: 1; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--gold-dark); color: #fff; outline: none; font-family: 'Roboto', sans-serif; margin-right: 10px; }
-
-        /* --- ABA: CAMPOS DE TREINO (FARM) --- */
-        #view-farm { flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(10,20,40,0.8) 0%, rgba(1,10,19,1) 100%); }
-        .farm-arena { text-align: center; background: rgba(0,0,0,0.7); border: 2px solid var(--gold-dark); padding: 50px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .bot-img { width: 150px; height: 150px; filter: drop-shadow(0 0 10px red); transition: 0.1s; margin-bottom: 20px; }
-        .bot-img:active { transform: scale(0.95); filter: drop-shadow(0 0 20px red); }
-        .health-bar-container { width: 300px; height: 25px; background: #333; border: 2px solid #000; margin: 0 auto 20px auto; position: relative; }
-        .health-bar-fill { width: 100%; height: 100%; background: var(--health-color); transition: width 0.2s ease-out; }
-        .health-text { position: absolute; top: 2px; left: 0; width: 100%; text-align: center; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; font-size: 14px;}
-        .dmg-text { position: absolute; color: red; font-weight: bold; font-size: 24px; pointer-events: none; animation: floatUp 1s forwards; text-shadow: 0 0 5px #000; }
         
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
+        .chat-input-area { display: flex; padding: 10px; background: rgba(0,0,0,1); border-top: 1px solid var(--border-color); }
+        #chat-input { flex: 1; background: rgba(10,20,40,0.5); border: 1px solid var(--border-color); color: #FFF; padding: 10px; outline: none; }
+        #btn-send { background: linear-gradient(to bottom, #1E2328, #0A1428); border: 1px solid var(--gold-dark); color: var(--gold); padding: 0 15px; font-weight: bold; }
 
-        /* Scrollbar Global */
-        ::-webkit-scrollbar { width: 8px; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #010a13; }
         ::-webkit-scrollbar-thumb { background: var(--gold-dark); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
     </style>
 </head>
 <body>
 
-    <!-- ÁUDIOS GERAIS -->
-    <!-- Substitua o src da música de fundo por um link de áudio longo válido, ou arquivo local -->
-    <audio id="bg-music" src="https://cdns-preview-b.dzcdn.net/stream/c-b2e0166bba75a7e0d37e6188e7a09141-3.mp3" loop></audio> 
-    <audio id="click-sound" src="https://actions.google.com/sounds/v1/ui/button_click.ogg"></audio>
+    <!-- ÁUDIOS -->
+    <!-- Música de fundo (Loop 1h ambiente épico) -->
+    <audio id="bg-music" src="https://cdn.pixabay.com/audio/2022/11/22/audio_febc508520.mp3" loop autoplay volume="0.2"></audio>
+    <!-- SFX de Clique -->
+    <audio id="click-sfx" src="https://assets.mixkit.co/sfx/preview/mixkit-interface-click-1126.mp3"></audio>
 
-    <!-- TELA DE LOGIN -->
-    <div id="login-screen">
+    <!-- 1. TELA DE LOGIN -->
+    <div id="login-screen" class="screen active">
         <div class="login-box">
-            <h1>Summoner's Rift</h1>
+            <h1>Summoner's Rift RPG</h1>
             <div class="input-group">
-                <label>Invocador</label>
-                <input type="text" id="username" placeholder="Seu nome..." autocomplete="off">
+                <label>Nome de Invocador</label>
+                <input type="text" id="username" placeholder="Digite seu nome..." autocomplete="off">
             </div>
-            <button class="btn" style="width: 100%;" onclick="fazerLogin()">Entrar na Fenda</button>
+            <button class="btn" style="width:100%" onclick="entrarLobby()">Conectar ao Servidor</button>
         </div>
     </div>
 
-    <!-- CLIENTE PRINCIPAL -->
-    <div id="main-client">
-        <!-- BARRA SUPERIOR (NAVEGAÇÃO) -->
-        <div class="topbar">
-            <div class="nav-tabs">
-                <button class="tab-btn active" onclick="changeTab('view-select', this)">Seleção</button>
-                <button class="tab-btn" onclick="changeTab('view-display', this)">Visão do Campeão</button>
-                <button class="tab-btn" onclick="changeTab('view-chat', this)">Arena (Chat)</button>
-                <button class="tab-btn" onclick="changeTab('view-farm', this)">Campos de Treino</button>
+    <!-- 2. TELA DE LOBBY & MATCHMAKING -->
+    <div id="lobby-screen" class="screen">
+        <div class="lobby-container">
+            <div class="lobby-header">
+                <span>Lobby da Partida</span>
+                <span id="player-count">Jogadores: 1</span>
             </div>
-            <div class="player-info">
-                <span>💰 <b id="ui-gold">0</b></span>
-                <span>⭐ Nv. <b id="ui-level">1</b> (<span id="ui-xp">0</span> XP)</span>
+            <div class="players-list" id="lobby-players">
+                <!-- Gerado via JS -->
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                <button class="btn" onclick="convidarBot()">+ Convidar Bot (Teste)</button>
+                <button class="btn" style="background: var(--gold); color: #000;" onclick="iniciarMatchmaking()">Iniciar Partida (Dividir Equipes)</button>
             </div>
         </div>
+    </div>
 
-        <div class="content-area">
+    <!-- 3. TELA DE SELEÇÃO DE CAMPEÕES -->
+    <div id="champ-select-screen" class="screen">
+        <div class="cs-header">Escolha seu Campeão</div>
+        <div class="cs-content">
+            <div class="roster" id="roster">
+                <!-- Gerado via JS -->
+            </div>
+            <div class="champ-details">
+                <h2 class="champ-name" id="c-name">Selecione um Herói</h2>
+                <p id="c-title" style="color: var(--gold-dark); margin-top:0;">O destino aguarda</p>
+                <div id="c-stats" style="color:#FFF; font-size: 13px; margin: 15px 0; line-height: 1.6;"></div>
+                <button class="btn lock-in-btn" id="btn-lockin" style="display:none;" onclick="confirmarCampeao()">Bloquear Campeão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TELA IN-GAME (O RPG EM SI) -->
+    <div id="in-game-screen" class="screen">
+        
+        <!-- PAINEL ESQUERDO: Personagem e Atributos -->
+        <div class="char-panel">
+            <div class="char-portrait">
+                <img id="ig-portrait" src="" alt="Campeão">
+                <div class="level-badge">1</div>
+            </div>
             
-            <!-- ABA 1: SELEÇÃO -->
-            <div id="view-select" class="view-section active">
-                <div class="roster-container">
-                    <h3 style="font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top:0;">Campeões Disponíveis</h3>
-                    <div class="roster-grid" id="roster">
-                        <!-- Gerado via JS -->
-                    </div>
+            <div class="status-bars">
+                <div class="bar-container">
+                    <div class="bar-fill bar-hp" id="bar-hp"></div>
+                    <div class="bar-text" id="txt-hp">600 / 600</div>
                 </div>
-                <div class="champ-details" id="champ-details">
-                    <div style="text-align: center; color: var(--gold-dark); margin-top: 50px;">Selecione um campeão à esquerda.</div>
+                <div class="bar-container">
+                    <div class="bar-fill bar-mana" id="bar-mana"></div>
+                    <div class="bar-text" id="txt-mana">300 / 300</div>
                 </div>
             </div>
 
-            <!-- ABA 2: VISÃO 3D/SPLASH ART -->
-            <div id="view-display" class="view-section">
-                <!-- Imagem genérica de placeholder de fundo até selecionar o campeão -->
-                <img id="splash-img" class="splash-art" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop" alt="Fundo Mágico">
-                <div class="splash-vignette"></div>
-                <div class="display-info" id="display-info" style="display: none;">
-                    <h1 id="splash-name">Nome</h1>
-                    <h3 id="splash-title">Título</h3>
-                </div>
-                <div id="display-placeholder" style="z-index: 10; color: var(--gold-dark); font-family: 'Cinzel'; font-size: 24px;">
-                    Nenhum campeão selecionado.
+            <div class="inventory-section">
+                <div class="inv-title">Atributos</div>
+                <div class="attributes-grid" id="ig-attributes">
+                    <!-- Preenchido no JS -->
                 </div>
             </div>
 
-            <!-- ABA 3: CHAT RPG -->
-            <div id="view-chat" class="view-section">
-                <div class="chat-wrapper">
-                    <div class="chat-header-rooms">
-                        <button class="room-btn active" onclick="changeRoom('Geral', this)">A Praça Central</button>
-                        <button class="room-btn" onclick="changeRoom('Taverna', this)">Taverna do Poro</button>
-                        <button class="room-btn" onclick="changeRoom('Batalha', this)">Arena de Duelos</button>
-                    </div>
-                    <div class="chat-messages" id="chat-messages">
-                        <div class="message msg-sys">Conectando aos reinos arcanos...</div>
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="Role sua ação ou envie uma mensagem..." onkeypress="if(event.key === 'Enter') enviarMensagem()">
-                        <button class="btn" onclick="enviarMensagem()">Enviar</button>
-                    </div>
+            <div class="inventory-section">
+                <div class="inv-title">Inventário</div>
+                <div class="inventory-grid">
+                    <div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div>
+                    <div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div>
                 </div>
+                <div class="trinket-slot">Trinket: Sentinela Invisível</div>
             </div>
-
-            <!-- ABA 4: FARM / BOTS -->
-            <div id="view-farm" class="view-section">
-                <div class="farm-arena">
-                    <h2 style="font-family: 'Cinzel'; color: var(--gold);">Alvo de Treinamento</h2>
-                    <p style="color: var(--gold-dark); font-size: 14px; margin-bottom: 30px;">Pratique seus ataques para ganhar Ouro e XP.</p>
-                    
-                    <div style="position: relative; display: inline-block;">
-                        <!-- Imagem do Bot -->
-                        <img src="https://cdn-icons-png.flaticon.com/512/8316/8316979.png" class="bot-img" id="bot-target" onclick="atacarBot(event)">
-                    </div>
-
-                    <div class="health-bar-container">
-                        <div class="health-bar-fill" id="bot-hp-fill"></div>
-                        <div class="health-text" id="bot-hp-text">100 / 100</div>
-                    </div>
-
-                    <button class="btn" onclick="atacarBot(event)">Atacar Alvo</button>
-                </div>
-            </div>
-
         </div>
+
+        <!-- PAINEL CENTRAL: Ações de Mundo/RPG -->
+        <div class="action-panel">
+            <div class="action-header">Mundo & Combate</div>
+            <div class="rpg-map">
+                <div class="action-card">
+                    <h3>Área: Selva (Jungle)</h3>
+                    <p style="font-size:12px; color:#aaa;">Enfrente monstros neutros para ganhar ouro e experiência.</p>
+                    <div class="target-list">
+                        <button class="btn target-btn" onclick="executarAcao('farm', 'Aronguejo')">Atacar Aronguejo</button>
+                        <button class="btn target-btn" onclick="executarAcao('farm', 'Rubrivira (Red)')">Fazer Red</button>
+                        <button class="btn target-btn" onclick="executarAcao('farm', 'Azuporã (Blue)')">Fazer Blue</button>
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <h3>Área: Rotas (Lanes)</h3>
+                    <p style="font-size:12px; color:#aaa;">Avance contra tropas inimigas e estruturas.</p>
+                    <div class="target-list">
+                        <button class="btn target-btn" onclick="executarAcao('lane', 'Minion Guerreiro')">Farmar Minions</button>
+                        <button class="btn target-btn" onclick="executarAcao('torre', 'Torre T1')">Atacar Torre</button>
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <h3>Batalha PvP (Equipe Inimiga)</h3>
+                    <p style="font-size:12px; color:#aaa;">Selecione um alvo para iniciar o turno de combate.</p>
+                    <div class="target-list" id="enemy-targets">
+                        <!-- Inimigos injetados no JS após matchmaking -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAINEL DIREITO: Chat Log da Partida -->
+        <div class="chat-container">
+            <div class="chat-header">Diário de Batalha (Chat)</div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message msg-sys">Bem-vindos a Summoner's Rift. As tropas foram liberadas.</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Comunique-se com a equipe..." onkeypress="if(event.key === 'Enter') enviarMensagem()">
+                <button class="btn" id="btn-send" onclick="enviarMensagem()">Falar</button>
+            </div>
+        </div>
+
     </div>
 
-    <!-- SCRIPT DE LÓGICA E DADOS -->
     <script>
         // ==========================================
-        // DADOS DOS CAMPEÕES (Adicionado 'splash' para a Aba Visão)
+        // SISTEMA DE EFEITOS SONOROS GLOBAIS
         // ==========================================
-        const campeoes = {
-            litlegot: {
-                id: 'litlegot', name: 'Litlegot', title: 'O Mago das Tintas', quote: 'Não me culpe pelos erros, é seu dever corrigi-los.',
-                icon: 'personagens/litlegot.jpeg', 
-                splash: 'https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?q=80&w=1920&auto=format&fit=crop', // Substitua pela imagem full HD do personagem
-                abilities: [
-                    { key: 'P', name: 'Aspiriração', desc: 'Permite comprar fora da base desenhando mercadores.', icon: 'habilidades/litlegot/passiva.jpg' },
-                    { key: 'Q', name: 'Ódio', desc: 'Desenha fogo. Dano contínuo de 10% da vida máxima.', icon: 'habilidades/litlegot/1_hab.jpg' },
-                    { key: 'W', name: 'Empatia', desc: 'Água calmante. Cura aliados e dá lentidão aos inimigos.', icon: 'habilidades/litlegot/2_hab.jpg' },
-                    { key: 'E', name: 'Felicidade', desc: 'Clarões de luz. Cega e enraíza inimigos.', icon: 'habilidades/litlegot/3_hab.jpg' },
-                    { key: 'R', name: 'Gênesis', desc: 'Altera o Q, W, E para cores secundárias baseadas nas emoções.', icon: 'habilidades/litlegot/R_hab.jpg' }
-                ]
-            },
-            abrax: {
-                id: 'abrax', name: 'Abrax', title: 'O Apostador Físico', quote: 'Me mostre o que sabe fazer e eu farei melhor.',
-                icon: 'personagens/abrax.jpeg',
-                splash: 'https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=1920&auto=format&fit=crop', // Substitua
-                abilities: [
-                    { key: 'P', name: 'A Falácia do Apostador', desc: 'Vampirismo universal aumenta com acerto crítico.', icon: 'habilidades/abrax/passiva.jpg' },
-                    { key: 'Q', name: 'Máscaras dos Tolos', desc: 'Copia habilidades de outros personagens.', icon: 'habilidades/abrax/1_hab.jpg' },
-                    { key: 'W', name: 'Honestamente?', desc: 'Dash ágil para reposicionamento.', icon: 'habilidades/abrax/2_hab.jpg' },
-                    { key: 'E', name: 'Sobrecarga', desc: 'Empurrão violento que atordoa.', icon: 'habilidades/abrax/3_hab.jpg' },
-                    { key: 'R', name: 'No Limite', desc: 'Velocidade de ataque massiva e vampirismo extremo.', icon: 'habilidades/abrax/r_hab.jpg' }
-                ]
-            },
-            psique: {
-                id: 'psique', name: 'Psique', title: 'Lutador Espiritual', quote: 'Venha desfrutar da liberdade que lhes tenho a oferecer.',
-                icon: 'personagens/psique.jpeg',
-                splash: 'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=1920&auto=format&fit=crop', // Substitua
-                abilities: [
-                    { key: 'P', name: 'O Prazer dos Mortos', desc: 'Rouba atributos base ao acertar habilidades.', icon: 'habilidades/psique/passiva.jpg' },
-                    { key: 'Q', name: 'Hora de Comer', desc: 'Dano extra explosivo para cura.', icon: 'habilidades/psique/1_hab.jpg' },
-                    { key: 'W', name: 'Véu do Além', desc: 'Fica invisível até atacar.', icon: 'habilidades/psique/2_hab.jpg' },
-                    { key: 'E', name: 'Borboletas Espirituais', desc: 'Coleta últimas habilidades usadas por heróis.', icon: 'habilidades/psique/3_hab.jpg' },
-                    { key: 'R', name: 'Área da Vida e Morte', desc: 'Cria zona que cura Psique e drena inimigos.', icon: 'habilidades/psique/r_hab.jpg' }
-                ]
-            }
-        };
+        document.addEventListener('click', () => {
+            const sfx = document.getElementById('click-sfx');
+            sfx.currentTime = 0;
+            sfx.volume = 0.3;
+            sfx.play().catch(()=>{});
+        });
 
-        let currentUser = "";
-        let currentChamp = null;
-        let currentRoom = "Geral";
-
-        // Váriaveis de RPG (Farm)
-        let playerGold = 0;
-        let playerXP = 0;
-        let playerLevel = 1;
-        let botMaxHP = 100;
-        let botCurrentHP = 100;
-
-        // Efeito sonoro de clique global
-        document.addEventListener('mousedown', () => {
-            let clickSnd = document.getElementById('click-sound');
-            clickSnd.currentTime = 0;
-            clickSnd.play().catch(()=>{});
+        // Configuração de Música
+        document.addEventListener('DOMContentLoaded', () => {
+            const bgm = document.getElementById('bg-music');
+            bgm.volume = 0.1;
         });
 
         // ==========================================
-        // FLUXO DE LOGIN E ABAS
+        // DADOS RICOS (RPG STATS & SKILLS)
         // ==========================================
-        function fazerLogin() {
-            const input = document.getElementById('username').value.trim();
-            if(!input) return alert("Digite um nome de Invocador.");
-            currentUser = input;
+        const campeoes = {
+            litlegot: {
+                id: 'litlegot', name: 'Litlegot', title: 'O Mago das Tintas',
+                icon: 'https://ddragon.leagueoflegends.com/cdn/13.19.1/img/champion/Hwei.png', // Usando icones genéricos/oficiais para simular
+                stats: { hp: 550, maxHp: 550, mana: 400, maxMana: 400, ad: 50, ap: 75, defF: 25, defM: 30, vampF: 0, vampM: 5, atkSpd: 0.62, hpRegen: 5, manaRegen: 8 }
+            },
+            abrax: {
+                id: 'abrax', name: 'Abrax', title: 'O Apostador Físico',
+                icon: 'https://ddragon.leagueoflegends.com/cdn/13.19.1/img/champion/Sett.png',
+                stats: { hp: 650, maxHp: 650, mana: 0, maxMana: 0, ad: 70, ap: 0, defF: 40, defM: 32, vampF: 10, vampM: 0, atkSpd: 0.75, hpRegen: 8, manaRegen: 0 }
+            },
+            psique: {
+                id: 'psique', name: 'Psique', title: 'Lutador Espiritual',
+                icon: 'https://ddragon.leagueoflegends.com/cdn/13.19.1/img/champion/Yone.png',
+                stats: { hp: 600, maxHp: 600, mana: 200, maxMana: 200, ad: 65, ap: 20, defF: 35, defM: 35, vampF: 5, vampM: 5, atkSpd: 0.85, hpRegen: 6, manaRegen: 4 }
+            }
+        };
 
-            // Inicia música de fundo
-            let bgm = document.getElementById('bg-music');
-            bgm.volume = 0.2;
-            bgm.play().catch(e => console.log("O navegador bloqueou o áudio automático."));
+        // ==========================================
+        // ESTADOS DO JOGO
+        // ==========================================
+        let currentUser = { nome: "", equipe: "", campeao: null, isSpectator: false };
+        let jogadoresLobby = [];
+        let equipeVermelha = [];
+        let equipeAzul = [];
 
-            document.getElementById('login-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-client').style.display = 'flex';
-                renderRoster();
-            }, 500);
+        // ==========================================
+        // NAVEGAÇÃO ENTRE TELAS
+        // ==========================================
+        function mostrarTela(idTela) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(idTela).classList.add('active');
         }
 
-        function changeTab(tabId, btn) {
-            // Atualiza botões
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            // Atualiza views
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+        function entrarLobby() {
+            const nome = document.getElementById('username').value.trim();
+            if(!nome) { alert("Digite seu nome!"); return; }
+            
+            currentUser.nome = nome;
+            jogadoresLobby.push({ nome: nome, isBot: false });
+            
+            atualizarLobby();
+            mostrarTela('lobby-screen');
         }
 
         // ==========================================
-        // SELEÇÃO E VISÃO 3D
+        // MATCHMAKING & LOBBY
         // ==========================================
-        function renderRoster() {
+        function convidarBot() {
+            const nomesBots = ["Faker (Bot)", "ShowMaker (Bot)", "Rekkles (Bot)", "Caps (Bot)"];
+            const botNome = nomesBots[Math.floor(Math.random() * nomesBots.length)] + " #" + Math.floor(Math.random()*1000);
+            jogadoresLobby.push({ nome: botNome, isBot: true });
+            atualizarLobby();
+        }
+
+        function atualizarLobby() {
+            const container = document.getElementById('lobby-players');
+            document.getElementById('player-count').innerText = `Jogadores: ${jogadoresLobby.length}`;
+            container.innerHTML = '';
+            jogadoresLobby.forEach(j => {
+                container.innerHTML += `<div class="player-card">${j.nome}</div>`;
+            });
+        }
+
+        function iniciarMatchmaking() {
+            if(jogadoresLobby.length === 0) return;
+
+            // Embaralha array
+            let embaralhado = [...jogadoresLobby].sort(() => 0.5 - Math.random());
+            
+            equipeAzul = [];
+            equipeVermelha = [];
+            let espectador = null;
+
+            // Se for ímpar e maior que 1, tira 1 para espectador (opcional da regra, vou manter o user como jogador sempre que possivel)
+            if (embaralhado.length % 2 !== 0 && embaralhado.length > 1) {
+                // Tenta achar um bot para ser espectador, se não tiver, pega o último
+                let indexToDrop = embaralhado.findIndex(p => p.isBot);
+                if(indexToDrop === -1) indexToDrop = embaralhado.length - 1;
+                espectador = embaralhado.splice(indexToDrop, 1)[0];
+            }
+
+            // Divide no meio
+            const meio = Math.ceil(embaralhado.length / 2);
+            equipeAzul = embaralhado.slice(0, meio);
+            equipeVermelha = embaralhado.slice(meio);
+
+            // Define status do usuário atual
+            if(espectador && espectador.nome === currentUser.nome) {
+                currentUser.isSpectator = true;
+                currentUser.equipe = "Espectador";
+            } else if (equipeAzul.find(p => p.nome === currentUser.nome)) {
+                currentUser.equipe = "Azul";
+            } else {
+                currentUser.equipe = "Vermelha";
+            }
+
+            carregarSelecaoCampeoes();
+            mostrarTela('champ-select-screen');
+        }
+
+        // ==========================================
+        // SELEÇÃO DE CAMPEÕES
+        // ==========================================
+        function carregarSelecaoCampeoes() {
             const rosterDiv = document.getElementById('roster');
             rosterDiv.innerHTML = '';
             for (const key in campeoes) {
@@ -377,8 +425,10 @@
                 btn.className = 'champ-icon-btn';
                 btn.id = `btn-${champ.id}`;
                 btn.onclick = () => selecionarCampeao(champ.id);
-                // Fallback para ícone genérico se a imagem local não carregar
-                btn.innerHTML = `<img src="${champ.icon}" onerror="this.src='https://via.placeholder.com/80/1a2b3c/c8aa6e?text=${champ.name}'">`;
+                btn.innerHTML = `
+                    <img src="${champ.icon}">
+                    <span style="position:absolute; bottom:5px; background:rgba(0,0,0,0.8); width:100%; text-align:center;">${champ.name}</span>
+                `;
                 rosterDiv.appendChild(btn);
             }
         }
@@ -386,155 +436,147 @@
         function selecionarCampeao(id) {
             document.querySelectorAll('.champ-icon-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById(`btn-${id}`).classList.add('selected');
-            currentChamp = campeoes[id];
-
-            // Atualiza Tela de Detalhes (Aba 1)
-            const detailsPanel = document.getElementById('champ-details');
-            let html = `
-                <div class="champ-header">
-                    <h2>${currentChamp.name}</h2>
-                    <div class="quote">"${currentChamp.quote}"</div>
-                </div>
-                <div class="abilities-container">
-            `;
-            currentChamp.abilities.forEach(ab => {
-                html += `
-                    <div class="ability">
-                        <div class="ability-icon">
-                            <img src="${ab.icon}" onerror="this.src='https://via.placeholder.com/50/000/c8aa6e?text=${ab.key}'">
-                            <div class="key">${ab.key}</div>
-                        </div>
-                        <div class="ability-info">
-                            <h4>${ab.name}</h4>
-                            <p>${ab.desc}</p>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            detailsPanel.innerHTML = html;
-
-            // Atualiza Tela de Visão (Aba 2)
-            document.getElementById('display-placeholder').style.display = 'none';
-            document.getElementById('display-info').style.display = 'block';
-            document.getElementById('splash-img').src = currentChamp.splash;
-            document.getElementById('splash-name').innerText = currentChamp.name;
-            document.getElementById('splash-title').innerText = currentChamp.title;
             
-            // Força reinício da animação da splash
-            let splash = document.getElementById('splash-img');
-            splash.style.transform = 'scale(1)';
-            setTimeout(() => { splash.style.transform = 'scale(1.05)'; }, 100);
+            const champ = campeoes[id];
+            currentUser.campeao = champ;
+
+            document.getElementById('c-name').innerText = champ.name;
+            document.getElementById('c-title').innerText = champ.title;
+            
+            const s = champ.stats;
+            document.getElementById('c-stats').innerHTML = `
+                <b>Vida:</b> ${s.hp} | <b>Mana:</b> ${s.mana}<br>
+                <b>AD:</b> ${s.ad} | <b>AP:</b> ${s.ap}<br>
+                <b>Armadura:</b> ${s.defF} | <b>Res. Magica:</b> ${s.defM}
+            `;
+            document.getElementById('btn-lockin').style.display = 'block';
+        }
+
+        function confirmarCampeao() {
+            montarInterfaceInGame();
+            mostrarTela('in-game-screen');
+            adicionarMensagemSistema(`A partida começou! Você está na Equipe ${currentUser.equipe}.`);
         }
 
         // ==========================================
-        // SISTEMA DE CHAT MOCKUP (Sem Firebase para evitar erros locais)
+        // INTERFACE IN-GAME E SISTEMA RPG
         // ==========================================
-        function changeRoom(sala, btn) {
-            document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentRoom = sala;
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML = `<div class="message msg-sys">Você entrou na sala: ${sala}...</div>`;
+        function montarInterfaceInGame() {
+            const c = currentUser.campeao;
+            const s = c.stats;
+
+            // Retrato e Barras
+            document.getElementById('ig-portrait').src = c.icon;
+            document.getElementById('txt-hp').innerText = `${s.hp} / ${s.maxHp}`;
+            document.getElementById('txt-mana').innerText = s.maxMana > 0 ? `${s.mana} / ${s.maxMana}` : `Sem Mana`;
+
+            // Atributos Grid
+            const attrGrid = document.getElementById('ig-attributes');
+            attrGrid.innerHTML = `
+                <div class="attr-item"><span>AD: ${s.ad}</span></div>
+                <div class="attr-item"><span>AP: ${s.ap}</span></div>
+                <div class="attr-item"><span>Armadura: ${s.defF}</span></div>
+                <div class="attr-item"><span>Res. Mágica: ${s.defM}</span></div>
+                <div class="attr-item"><span>Vamp Fis.: ${s.vampF}%</span></div>
+                <div class="attr-item"><span>Vamp Mag.: ${s.vampM}%</span></div>
+                <div class="attr-item"><span>Vel. Ataque: ${s.atkSpd}</span></div>
+                <div class="attr-item"><span>Regen Vida: ${s.hpRegen}</span></div>
+            `;
+
+            // Inimigos Disponíveis para Batalha
+            const inimigos = currentUser.equipe === "Azul" ? equipeVermelha : equipeAzul;
+            const targetDiv = document.getElementById('enemy-targets');
+            targetDiv.innerHTML = '';
+            
+            if(inimigos.length === 0) {
+                targetDiv.innerHTML = '<span style="color:#aaa; font-size:12px;">Nenhum inimigo encontrado.</span>';
+            } else {
+                inimigos.forEach(ini => {
+                    targetDiv.innerHTML += `<button class="btn target-btn" onclick="executarAcao('pvp', '${ini.nome}')">Atacar ${ini.nome}</button>`;
+                });
+            }
         }
 
+        // --- MOTOR DE COMBATE RPG LOGADO NO CHAT ---
+        function executarAcao(tipo, alvo) {
+            const c = currentUser.campeao;
+            const s = c.stats;
+            
+            // Calculo base de dano (mistura de AD e AP simulada)
+            let danoBase = Math.floor(s.ad + (s.ap * 0.5)); 
+            let chanceDesvio = Math.random() * 100; // 0 a 100
+
+            if (tipo === 'farm') {
+                if(chanceDesvio < 15) {
+                    adicionarMensagemCombat(`Você tentou atacar <b>${alvo}</b>, mas errou o golpe! (Desvio)`);
+                } else {
+                    let ouro = Math.floor(Math.random() * 50) + 20;
+                    adicionarMensagemFarm(`Você derrotou <b>${alvo}</b> causando ${danoBase} de dano! Ganhou +${ouro} de Ouro.`);
+                    aplicarVampirismo(danoBase);
+                }
+            } 
+            else if (tipo === 'lane') {
+                adicionarMensagemFarm(`Você limpou a onda de <b>${alvo}</b>. +20 de Ouro.`);
+            }
+            else if (tipo === 'torre') {
+                adicionarMensagemCombat(`Você atacou a <b>${alvo}</b> causando ${danoBase} de dano estrutural.`);
+            }
+            else if (tipo === 'pvp') {
+                if(chanceDesvio < 25) { // Inimigos players tem mais chance de dodge
+                    adicionarMensagemCombat(`Você avançou contra o Campeão <b>${alvo}</b>, mas ele usou um Dash e desviou!`);
+                } else {
+                    adicionarMensagemCombat(`Turno de Ataque: Você atingiu <b>${alvo}</b> em cheio, causando <span style="color:#ffcc00">${danoBase} de Dano Verdadeiro</span>!`);
+                    aplicarVampirismo(danoBase);
+                }
+            }
+        }
+
+        function aplicarVampirismo(danoCausado) {
+            const s = currentUser.campeao.stats;
+            if(s.vampF > 0 || s.vampM > 0) {
+                let cura = Math.floor(danoCausado * ((s.vampF + s.vampM) / 100));
+                if(cura > 0) {
+                    adicionarMensagemFarm(`<i>(Vampirismo) Você recuperou ${cura} de Vida.</i>`);
+                }
+            }
+        }
+
+        // ==========================================
+        // SISTEMA DE CHAT INTERNO
+        // ==========================================
         function enviarMensagem() {
             const input = document.getElementById('chat-input');
             const texto = input.value.trim();
-            if (!texto) return;
+            if (texto === "") return;
 
             const chatBox = document.getElementById('chat-messages');
-            const champNome = currentChamp ? currentChamp.name : "Espectador";
-            
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message msg-user';
-            // Escapa HTML simples
-            const cleanText = texto.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            
-            msgDiv.innerHTML = `<span class="msg-name">${currentUser}</span> <span style="font-size:11px; color:#0AC8B9">(${champNome})</span>: ${cleanText}`;
-            chatBox.appendChild(msgDiv);
+            chatBox.innerHTML += `
+                <div class="message msg-user">
+                    <span class="msg-name">[Eq. ${currentUser.equipe}] ${currentUser.nome}</span>
+                    <span style="color:var(--blue-light); font-size:11px;">(${currentUser.campeao.name})</span>: 
+                    <span>${texto.replace(/</g, "&lt;")}</span>
+                </div>
+            `;
             chatBox.scrollTop = chatBox.scrollHeight;
             input.value = "";
         }
 
-        // ==========================================
-        // SISTEMA DE FARM (RPG BÁSICO)
-        // ==========================================
-        function atacarBot(event) {
-            if(!currentChamp) {
-                alert("Você precisa selecionar um campeão na aba 'Seleção' antes de lutar!");
-                return;
-            }
-
-            // Calcula dano (básico + aleatoriedade baseada no nível)
-            let dano = Math.floor(Math.random() * 10) + 15 + (playerLevel * 2);
-            botCurrentHP -= dano;
-
-            // Efeito visual de dano na tela
-            mostrarDanoVisual(dano, event);
-
-            if(botCurrentHP <= 0) {
-                // Bot morreu: recompensa
-                botCurrentHP = botMaxHP;
-                let goldGained = 15 + playerLevel;
-                let xpGained = 50;
-                playerGold += goldGained;
-                playerXP += xpGained;
-                
-                // Checa Level Up
-                if(playerXP >= playerLevel * 200) {
-                    playerXP -= (playerLevel * 200);
-                    playerLevel++;
-                    botMaxHP += 50; // Bot fica mais forte
-                    botCurrentHP = botMaxHP;
-                    alert(`Gênio! Você alcançou o nível ${playerLevel}!`);
-                }
-                
-                atualizarHUD();
-            }
-
-            atualizarBarraHP();
+        function adicionarMensagemSistema(texto) {
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML += `<div class="message msg-sys">${texto}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function atualizarHUD() {
-            document.getElementById('ui-gold').innerText = playerGold;
-            document.getElementById('ui-level').innerText = playerLevel;
-            document.getElementById('ui-xp').innerText = playerXP;
+        function adicionarMensagemCombat(texto) {
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML += `<div class="message msg-combat">${texto}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function atualizarBarraHP() {
-            const fill = document.getElementById('bot-hp-fill');
-            const text = document.getElementById('bot-hp-text');
-            let percent = (botCurrentHP / botMaxHP) * 100;
-            fill.style.width = percent + '%';
-            
-            // Muda a cor dependendo da vida
-            if(percent > 50) fill.style.background = '#2ecc71';
-            else if(percent > 20) fill.style.background = '#f1c40f';
-            else fill.style.background = '#e74c3c';
-
-            text.innerText = `${Math.max(0, botCurrentHP)} / ${botMaxHP}`;
-        }
-
-        function mostrarDanoVisual(dano, event) {
-            const arena = document.querySelector('.farm-arena');
-            const floatingText = document.createElement('div');
-            floatingText.className = 'dmg-text';
-            floatingText.innerText = `-${dano}`;
-            
-            // Posição aproximada de onde clicou ou do centro do alvo
-            let rect = document.getElementById('bot-target').getBoundingClientRect();
-            // Se o evento foi via botão, event.clientX será diferente da imagem.
-            let posX = event.clientX ? (event.clientX - rect.left - 20) : 50;
-            let posY = event.clientY ? (event.clientY - rect.top) : 50;
-            
-            floatingText.style.left = `calc(50% + ${Math.random() * 40 - 20}px)`; // Aleatório perto do centro
-            floatingText.style.top = '100px';
-
-            arena.appendChild(floatingText);
-            
-            // Remove o elemento após a animação
-            setTimeout(() => { floatingText.remove(); }, 1000);
+        function adicionarMensagemFarm(texto) {
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML += `<div class="message msg-farm">${texto}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
     </script>
