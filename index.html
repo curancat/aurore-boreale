@@ -3,582 +3,744 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summoner's Rift RPG - Hextech Client</title>
+    <title>League Client - Hextech Edition</title>
     <style>
         /* =========================================
-           TEMA HEXTECH & CURSOR CUSTOMIZADO
+           TEMA HEXTECH, MOUSE & ANIMAÇÕES
            ========================================= */
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Roboto:wght@300;400;500;700&display=swap');
 
         :root {
             --gold: #C8AA6E;
-            --gold-dark: #7A5C29;
             --gold-light: #F0E6D2;
-            --blue-dark: #0A1428;
+            --gold-dark: #7A5C29;
             --blue-light: #0AC8B9;
             --blue-magic: #005A82;
-            --bg-color: #010A13;
-            --border-color: #463714;
-            --red-team: #c0392b;
-            --blue-team: #2980b9;
+            --blue-dark: #0A1428;
+            --bg-dark: #010A13;
+            --border-hextech: #463714;
+            --border-active: #C8AA6E;
+            --panel-bg: rgba(1, 10, 19, 0.88);
         }
 
-        /* Cursor Customizado do LoL */
+        /* Cursor Customizado Hextech estilo LoL */
         * {
-            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), auto !important;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23C8AA6E" stroke="%23010A13" stroke-width="1.5" d="M3 3l7 18 3-7 7-3L3 3z"/></svg>'), auto !important;
+        }
+
+        button, input, .clickable {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%230AC8B9" stroke="%23F0E6D2" stroke-width="1.5" d="M3 3l7 18 3-7 7-3L3 3z"/></svg>'), pointer !important;
         }
 
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 5px var(--gold-dark); }
-            50% { box-shadow: 0 0 20px var(--gold), inset 0 0 10px var(--gold-dark); }
+            50% { box-shadow: 0 0 18px var(--gold), inset 0 0 10px var(--gold-dark); }
             100% { box-shadow: 0 0 5px var(--gold-dark); }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bgFloat {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100vh;
-            background-color: var(--bg-color);
+            background-color: var(--bg-dark);
             background-image: radial-gradient(circle at center, #0a1428 0%, #010a13 100%);
+            background-size: 200% 200%;
+            animation: bgFloat 25s ease infinite;
             font-family: 'Roboto', sans-serif; color: var(--gold-light);
             overflow: hidden;
+            user-select: none;
         }
-
-        /* Classes de Controle de Telas */
-        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-        .screen.active { display: flex; animation: fadeIn 0.5s ease; }
-
-        /* --- BOTÕES GERAIS --- */
-        .btn {
-            background: linear-gradient(to bottom, #1E2328, #0A1428); border: 1px solid var(--gold);
-            color: var(--gold); padding: 12px 20px; font-family: 'Cinzel', serif; font-weight: bold;
-            text-transform: uppercase; transition: 0.3s; letter-spacing: 1px; text-align: center;
-        }
-        .btn:hover { background: var(--gold); color: var(--bg-color); box-shadow: 0 0 15px var(--gold); }
 
         /* --- TELA DE LOGIN --- */
-        #login-screen { justify-content: center; align-items: center; background: rgba(1, 10, 19, 0.95); z-index: 100; }
-        .login-box { background: linear-gradient(135deg, rgba(10,20,40,0.9), rgba(1,10,19,0.9)); border: 2px solid var(--gold-dark); padding: 40px; width: 320px; text-align: center; animation: pulseGlow 4s infinite; }
-        .login-box h1 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 30px; font-size: 26px; text-transform: uppercase; }
+        #login-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 200; background: rgba(1, 10, 19, 0.96);
+            backdrop-filter: blur(8px); transition: opacity 0.5s ease;
+        }
+
+        .login-box {
+            background: linear-gradient(135deg, rgba(10,20,40,0.95) 0%, rgba(1,10,19,0.95) 100%);
+            border: 2px solid var(--gold-dark); padding: 45px; width: 340px;
+            text-align: center; position: relative;
+            animation: pulseGlow 4s infinite;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .login-box h1 {
+            font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 25px;
+            font-size: 24px; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--gold-dark);
+        }
+
         .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; color: var(--gold-dark); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-        .input-group input { width: calc(100% - 22px); padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--gold-light); outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: var(--gold); box-shadow: 0 0 10px var(--gold-dark); }
+        .input-group label { display: block; font-size: 11px; color: var(--gold); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group input {
+            width: calc(100% - 24px); padding: 11px; background: rgba(0,0,0,0.6);
+            border: 1px solid var(--border-hextech); color: var(--gold-light);
+            outline: none; transition: 0.3s; font-family: 'Roboto', sans-serif;
+        }
+        .input-group input:focus { border-color: var(--gold); box-shadow: 0 0 12px var(--gold-dark); background: rgba(10,20,40,0.9); }
 
-        /* --- TELA DE LOBBY --- */
-        #lobby-screen { flex-direction: column; padding: 40px; background: url('https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Azir_0.jpg') center/cover; }
-        .lobby-container { background: rgba(1, 10, 19, 0.85); border: 2px solid var(--gold-dark); flex: 1; display: flex; flex-direction: column; padding: 20px; backdrop-filter: blur(10px); }
-        .lobby-header { font-family: 'Cinzel', serif; font-size: 24px; color: var(--gold); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; }
-        .players-list { display: flex; flex-wrap: wrap; gap: 15px; flex: 1; align-content: flex-start; }
-        .player-card { background: rgba(10,20,40,0.8); border: 1px solid var(--gold-dark); padding: 15px; min-width: 150px; text-align: center; }
-        .player-card.red { border-color: var(--red-team); box-shadow: 0 0 10px rgba(192, 57, 43, 0.5); }
-        .player-card.blue { border-color: var(--blue-team); box-shadow: 0 0 10px rgba(41, 128, 185, 0.5); }
+        .btn {
+            background: linear-gradient(to bottom, #1E2328, #0A1428); border: 1px solid var(--gold);
+            color: var(--gold); padding: 12px 20px;
+            font-family: 'Cinzel', serif; font-weight: bold; text-transform: uppercase;
+            width: 100%; transition: 0.3s; letter-spacing: 1.5px;
+        }
+        .btn:hover { background: var(--gold); color: var(--bg-dark); box-shadow: 0 0 18px var(--gold); }
 
-        /* --- TELA DE SELEÇÃO DE CAMPEÕES --- */
-        #champ-select-screen { flex-direction: column; background: radial-gradient(circle at top left, rgba(10,20,40,0.9) 0%, rgba(1,10,19,1) 100%); }
-        .cs-header { text-align: center; padding: 15px; font-family: 'Cinzel', serif; color: var(--gold); font-size: 24px; border-bottom: 1px solid var(--gold-dark); }
-        .cs-content { display: flex; flex: 1; padding: 20px; gap: 20px; }
-        .roster { flex: 2; display: flex; gap: 15px; flex-wrap: wrap; align-content: flex-start; }
-        .champ-icon-btn { width: 80px; height: 80px; border: 2px solid var(--border-color); position: relative; display: flex; justify-content: center; align-items: center; color: var(--gold-dark); font-size: 11px; background: #000; overflow: hidden; }
-        .champ-icon-btn img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 0.3s; }
-        .champ-icon-btn:hover img, .champ-icon-btn.selected img { opacity: 1; }
-        .champ-icon-btn.selected { border-color: var(--gold); transform: scale(1.05); box-shadow: 0 0 15px var(--gold); }
-        .champ-details { flex: 1; background: rgba(10,20,40,0.8); border: 1px solid var(--gold-dark); padding: 20px; display: flex; flex-direction: column; }
-        .champ-name { font-family: 'Cinzel', serif; font-size: 32px; color: var(--gold); margin: 0; }
-        .lock-in-btn { margin-top: auto; padding: 15px; font-size: 18px; }
+        /* --- CLIENTE PRINCIPAL --- */
+        #main-client { display: none; width: 100%; height: 100%; flex-direction: column; }
 
-        /* --- TELA IN-GAME (RPG & CHAT) --- */
-        #in-game-screen { display: flex; flex-direction: row; }
+        /* BARRA SUPERIOR (TOPBAR) */
+        .topbar {
+            height: 65px; background: linear-gradient(to right, rgba(1,10,19,1), rgba(10,20,40,0.95));
+            border-bottom: 2px solid var(--gold-dark); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            z-index: 50;
+        }
+
+        .nav-tabs { display: flex; gap: 10px; }
+        .nav-tab-btn {
+            background: transparent; border: none; color: #888;
+            font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700;
+            padding: 18px 20px; text-transform: uppercase; letter-spacing: 1px;
+            border-bottom: 3px solid transparent; transition: all 0.3s;
+        }
+        .nav-tab-btn:hover { color: var(--gold-light); }
+        .nav-tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+
+        /* PLAYER DE MÚSICA DE FUNDO */
+        .bgm-controls {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border-hextech);
+            padding: 6px 14px; border-radius: 20px;
+        }
+        .bgm-title { font-size: 11px; color: var(--gold); font-family: 'Cinzel', serif; letter-spacing: 1px; }
+        .bgm-btn {
+            background: none; border: 1px solid var(--gold-dark); color: var(--gold);
+            width: 28px; height: 28px; border-radius: 50%; font-size: 12px;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .bgm-btn:hover { background: var(--gold); color: #000; }
+
+        /* ÁREA DE CONTEÚDO PRINCIPAL */
+        .content-area { flex: 1; height: calc(100% - 65px); position: relative; }
+        .view-panel { display: none; width: 100%; height: 100%; }
+        .view-panel.active { display: flex; }
+
+        /* =========================================
+            TELA 1: SELEÇÃO DE CAMPEÕES & SHOWCASE
+           ========================================= */
+        .champ-select-layout { display: flex; width: 100%; height: 100%; }
+
+        /* Lista Lateral de Campeões */
+        .roster-sidebar {
+            width: 320px; background: rgba(1, 10, 19, 0.92); border-right: 2px solid var(--border-hextech);
+            padding: 25px 15px; display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.6);
+        }
+        .roster-header {
+            font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold);
+            text-transform: uppercase; letter-spacing: 1px; text-align: center;
+            border-bottom: 1px solid var(--border-hextech); padding-bottom: 10px;
+        }
+
+        .roster-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; overflow-y: auto; padding-right: 5px; }
+        .champ-card {
+            height: 120px; background-color: #000; border: 2px solid var(--border-hextech);
+            position: relative; overflow: hidden; transition: all 0.3s;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .champ-card img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.7; transition: 0.4s; }
+        .champ-card:hover img, .champ-card.selected img { opacity: 1; transform: scale(1.08); }
+        .champ-card:hover { border-color: var(--gold-light); transform: translateY(-3px); }
+        .champ-card.selected { border-color: var(--gold); animation: pulseGlow 2s infinite; }
+        .champ-card-name {
+            position: relative; z-index: 2; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            text-align: center; font-family: 'Cinzel', serif; font-size: 12px; color: var(--gold-light);
+            padding: 6px 0; font-weight: bold;
+        }
+
+        /* SHOWCASE DO CAMPEÃO (ESTILO LOL PC) */
+        .champ-showcase {
+            flex: 1; display: flex; flex-direction: column; position: relative;
+            background: radial-gradient(circle at 70% 30%, rgba(10,20,40,0.7) 0%, rgba(1,10,19,0.95) 100%);
+            padding: 40px; overflow-y: auto;
+        }
+
+        .showcase-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-hextech); padding-bottom: 20px; }
+        .champ-identity { display: flex; flex-direction: column; }
+        .champ-title-badge { font-family: 'Cinzel', serif; font-size: 13px; color: var(--blue-light); text-transform: uppercase; letter-spacing: 2px; }
+        .champ-main-name { font-family: 'Cinzel', serif; font-size: 46px; color: var(--gold); text-transform: uppercase; margin: 5px 0; text-shadow: 0 0 20px rgba(200, 170, 110, 0.4); }
+        .champ-quote-box { font-style: italic; color: #A09B8C; font-size: 14px; border-left: 3px solid var(--gold); padding-left: 12px; margin-top: 5px; }
+
+        /* BARRAS DE ATRIBUTOS DO PERSONAGEM */
+        .stats-container { display: flex; gap: 20px; background: rgba(0,0,0,0.4); padding: 15px 20px; border: 1px solid var(--border-hextech); }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; width: 90px; }
+        .stat-label { font-size: 10px; font-family: 'Cinzel', serif; color: var(--gold); text-transform: uppercase; }
+        .stat-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; background: var(--blue-light); width: 0%; transition: width 0.8s ease; }
+
+        /* SEÇÃO DE HABILIDADES */
+        .abilities-section { margin-top: 30px; display: flex; flex-direction: column; gap: 15px; }
+        .section-title { font-family: 'Cinzel', serif; color: var(--gold); font-size: 18px; letter-spacing: 1px; border-bottom: 1px solid rgba(200,170,110,0.2); padding-bottom: 8px; }
+
+        .ability-card {
+            display: flex; gap: 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-hextech);
+            padding: 18px; transition: 0.3s; animation: fadeIn 0.4s ease backwards;
+        }
+        .ability-card:hover { border-color: var(--gold); background: rgba(10,20,40,0.6); }
+
+        .ability-icon-wrapper {
+            width: 60px; height: 60px; border: 1px solid var(--gold); background: #000;
+            position: relative; flex-shrink: 0;
+        }
+        .ability-icon-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .ability-key {
+            position: absolute; bottom: -6px; right: -6px; background: var(--bg-dark);
+            border: 1px solid var(--gold); color: var(--gold); font-family: 'Cinzel', serif;
+            font-size: 11px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-weight: bold;
+        }
+
+        .ability-details { flex: 1; }
+        .ability-title { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 16px; font-weight: bold; margin-bottom: 6px; }
+        .ability-description { color: #B0A890; font-size: 13px; line-height: 1.5; }
+
+        /* PALETA DA HABILIDADE GÊNESIS (LITLEGOT) */
+        .genesis-container { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-hextech); }
+        .genesis-palette-tabs { display: flex; gap: 10px; margin-bottom: 12px; }
+        .palette-btn {
+            padding: 6px 12px; border: 1px solid var(--border-hextech); background: rgba(0,0,0,0.6);
+            color: var(--gold-light); font-size: 11px; font-family: 'Cinzel', serif;
+        }
+        .palette-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(200,170,110,0.1); }
+
+        /* =========================================
+            TELA 2: CHAT DO LÓBI (SEPARADO)
+           ========================================= */
+        .chat-view-layout { display: flex; width: 100%; height: 100%; background: rgba(1, 10, 19, 0.95); }
+
+        .chat-rooms-sidebar {
+            width: 260px; border-right: 1px solid var(--border-hextech); background: rgba(0,0,0,0.4);
+            padding: 20px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .room-select-btn {
+            background: transparent; border: 1px solid var(--border-hextech); color: var(--gold-light);
+            padding: 12px 15px; text-align: left; font-family: 'Cinzel', serif; font-size: 13px;
+            transition: 0.3s;
+        }
+        .room-select-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .room-select-btn.active { background: rgba(200,170,110,0.15); border-color: var(--gold); color: var(--gold); }
+
+        .chat-main-panel { flex: 1; display: flex; flex-direction: column; }
+        .chat-header-bar {
+            padding: 20px 30px; border-bottom: 1px solid var(--border-hextech);
+            font-family: 'Cinzel', serif; color: var(--gold); font-size: 18px; letter-spacing: 1px;
+        }
+        .chat-feed { flex: 1; padding: 25px 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         
-        /* Painel do Personagem (Esquerda) */
-        .char-panel { width: 350px; background: linear-gradient(180deg, rgba(10,20,40,0.95), rgba(1,10,19,0.95)); border-right: 2px solid var(--gold-dark); display: flex; flex-direction: column; overflow-y: auto; }
-        .char-portrait { width: 100%; height: 200px; background: #000; position: relative; border-bottom: 2px solid var(--gold); }
-        .char-portrait img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        .char-portrait .level-badge { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; background: var(--bg-color); border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: 'Cinzel'; }
-        
-        /* Barras de Status */
-        .status-bars { padding: 20px; }
-        .bar-container { background: #000; height: 18px; border: 1px solid var(--border-color); margin-bottom: 10px; position: relative; }
-        .bar-fill { height: 100%; transition: width 0.3s; }
-        .bar-hp { background: linear-gradient(90deg, #8b0000, #ff4c4c); width: 100%; }
-        .bar-mana { background: linear-gradient(90deg, #00008b, #4c4cff); width: 100%; }
-        .bar-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 11px; line-height: 18px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+        .chat-msg {
+            background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 4px;
+            border-left: 3px solid var(--blue-magic); font-size: 14px; animation: fadeIn 0.3s ease;
+        }
+        .chat-msg.sys { border-left-color: var(--gold-dark); color: var(--gold-dark); font-style: italic; }
+        .chat-msg-user { font-weight: bold; color: var(--gold); font-family: 'Cinzel', serif; margin-right: 6px; }
+        .chat-msg-champ { font-size: 11px; color: var(--blue-light); margin-right: 10px; }
+        .chat-msg-text { color: var(--gold-light); }
 
-        /* Atributos Grid */
-        .attributes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; }
-        .attr-item { display: flex; align-items: center; background: rgba(0,0,0,0.4); padding: 5px; border: 1px solid #2a2a2a; font-size: 12px; }
-        .attr-item img { width: 16px; height: 16px; margin-right: 8px; filter: sepia(1) hue-rotate(10deg); }
-        .attr-item span { color: var(--gold-light); font-weight: bold; }
+        .chat-input-bar { display: flex; padding: 20px 30px; gap: 15px; background: rgba(0,0,0,0.6); border-top: 1px solid var(--border-hextech); }
+        .chat-input-bar input {
+            flex: 1; background: rgba(10,20,40,0.8); border: 1px solid var(--border-hextech);
+            color: #FFF; padding: 12px 18px; outline: none; transition: 0.3s;
+        }
+        .chat-input-bar input:focus { border-color: var(--gold); box-shadow: 0 0 10px var(--gold-dark); }
 
-        /* Inventário */
-        .inventory-section { padding: 20px; }
-        .inv-title { font-family: 'Cinzel'; color: var(--gold); font-size: 14px; text-transform: uppercase; margin-bottom: 10px; text-align: center; border-bottom: 1px solid var(--gold-dark); }
-        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-        .inv-slot { aspect-ratio: 1; background: rgba(0,0,0,0.6); border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 10px; color: #555; }
-        .trinket-slot { grid-column: span 3; height: 30px; margin-top: 5px; background: rgba(0,0,0,0.6); border: 1px solid var(--gold-dark); text-align: center; line-height: 30px; font-size: 12px; }
-
-        /* Painel Central (Ações de RPG) */
-        .action-panel { flex: 1; display: flex; flex-direction: column; background: rgba(1, 10, 19, 0.8); position: relative; }
-        .action-header { padding: 15px; background: rgba(10,20,40,0.9); border-bottom: 1px solid var(--border-color); text-align: center; font-family: 'Cinzel'; color: var(--gold); }
-        .rpg-map { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-        
-        .action-card { background: rgba(0,0,0,0.6); border: 1px solid var(--gold-dark); padding: 20px; text-align: center; transition: 0.3s; }
-        .action-card:hover { border-color: var(--gold); background: rgba(10,20,40,0.6); transform: translateY(-3px); }
-        .action-card h3 { margin: 0 0 10px 0; color: var(--blue-light); font-family: 'Cinzel'; }
-        
-        .target-list { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-        .target-btn { background: #111; border: 1px solid var(--border-color); color: #FFF; padding: 8px 15px; transition: 0.3s; }
-        .target-btn:hover { background: var(--red-team); border-color: #ff4c4c; }
-
-        /* Painel de Chat (Direita - A Partida) */
-        .chat-container { width: 400px; display: flex; flex-direction: column; background: rgba(1, 10, 19, 0.95); border-left: 2px solid var(--gold-dark); }
-        .chat-header { padding: 15px; background: linear-gradient(180deg, rgba(10,20,40,0.9) 0%, rgba(1,10,19,0) 100%); font-family: 'Cinzel', serif; color: var(--gold); text-align: center; border-bottom: 1px solid var(--border-color); }
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
-        .message { padding: 8px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 3px solid transparent; }
-        .msg-sys { color: var(--gold-dark); font-style: italic; border-left-color: var(--gold-dark); text-align: center; }
-        .msg-combat { color: #ff4c4c; background: rgba(255, 76, 76, 0.05); border-left-color: var(--red-team); }
-        .msg-farm { color: #2ecc71; background: rgba(46, 204, 113, 0.05); border-left-color: #2ecc71; }
-        .msg-user { color: var(--gold-light); border-left-color: var(--blue-magic); }
-        .msg-name { color: var(--gold); font-weight: bold; }
-        
-        .chat-input-area { display: flex; padding: 10px; background: rgba(0,0,0,1); border-top: 1px solid var(--border-color); }
-        #chat-input { flex: 1; background: rgba(10,20,40,0.5); border: 1px solid var(--border-color); color: #FFF; padding: 10px; outline: none; }
-        #btn-send { background: linear-gradient(to bottom, #1E2328, #0A1428); border: 1px solid var(--gold-dark); color: var(--gold); padding: 0 15px; font-weight: bold; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #010a13; }
-        ::-webkit-scrollbar-thumb { background: var(--gold-dark); }
+        /* MINICHAT RETRÁTIL NA TELA DE SELEÇÃO */
+        .mini-chat-toggle {
+            position: absolute; bottom: 20px; right: 20px; z-index: 100;
+            background: var(--blue-dark); border: 1px solid var(--gold); color: var(--gold);
+            padding: 10px 18px; font-family: 'Cinzel', serif; font-size: 12px; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <!-- ÁUDIOS -->
-    <!-- Música de fundo (Loop 1h ambiente épico) -->
-    <audio id="bg-music" src="https://cdn.pixabay.com/audio/2022/11/22/audio_febc508520.mp3" loop autoplay volume="0.2"></audio>
-    <!-- SFX de Clique -->
-    <audio id="click-sfx" src="https://assets.mixkit.co/sfx/preview/mixkit-interface-click-1126.mp3"></audio>
+    <!-- AUDIO BGM DA INTERFACE -->
+    <audio id="bgm-player" loop preload="auto">
+        <!-- Áudio ambiente Hextech LoL Style em loop continuado -->
+        <source src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3" type="audio/mpeg">
+    </audio>
 
-    <!-- 1. TELA DE LOGIN -->
-    <div id="login-screen" class="screen active">
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
         <div class="login-box">
-            <h1>Summoner's Rift RPG</h1>
+            <h1>Summoner's Rift</h1>
             <div class="input-group">
                 <label>Nome de Invocador</label>
                 <input type="text" id="username" placeholder="Digite seu nome..." autocomplete="off">
             </div>
-            <button class="btn" style="width:100%" onclick="entrarLobby()">Conectar ao Servidor</button>
+            <div class="input-group">
+                <label>Senha Hextech</label>
+                <input type="password" id="password" placeholder="********">
+            </div>
+            <button class="btn clickable" onclick="fazerLogin()">Conectar</button>
         </div>
     </div>
 
-    <!-- 2. TELA DE LOBBY & MATCHMAKING -->
-    <div id="lobby-screen" class="screen">
-        <div class="lobby-container">
-            <div class="lobby-header">
-                <span>Lobby da Partida</span>
-                <span id="player-count">Jogadores: 1</span>
-            </div>
-            <div class="players-list" id="lobby-players">
-                <!-- Gerado via JS -->
-            </div>
-            <div style="margin-top: 20px; display: flex; justify-content: space-between;">
-                <button class="btn" onclick="convidarBot()">+ Convidar Bot (Teste)</button>
-                <button class="btn" style="background: var(--gold); color: #000;" onclick="iniciarMatchmaking()">Iniciar Partida (Dividir Equipes)</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. TELA DE SELEÇÃO DE CAMPEÕES -->
-    <div id="champ-select-screen" class="screen">
-        <div class="cs-header">Escolha seu Campeão</div>
-        <div class="cs-content">
-            <div class="roster" id="roster">
-                <!-- Gerado via JS -->
-            </div>
-            <div class="champ-details">
-                <h2 class="champ-name" id="c-name">Selecione um Herói</h2>
-                <p id="c-title" style="color: var(--gold-dark); margin-top:0;">O destino aguarda</p>
-                <div id="c-stats" style="color:#FFF; font-size: 13px; margin: 15px 0; line-height: 1.6;"></div>
-                <button class="btn lock-in-btn" id="btn-lockin" style="display:none;" onclick="confirmarCampeao()">Bloquear Campeão</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. TELA IN-GAME (O RPG EM SI) -->
-    <div id="in-game-screen" class="screen">
+    <!-- CLIENTE PRINCIPAL -->
+    <div id="main-client">
         
-        <!-- PAINEL ESQUERDO: Personagem e Atributos -->
-        <div class="char-panel">
-            <div class="char-portrait">
-                <img id="ig-portrait" src="" alt="Campeão">
-                <div class="level-badge">1</div>
+        <!-- BARRA SUPERIOR -->
+        <div class="topbar">
+            <div class="nav-tabs">
+                <button class="nav-tab-btn active clickable" onclick="mudarAba('selecao', this)">⚔️ Seleção de Campeões</button>
+                <button class="nav-tab-btn clickable" onclick="mudarAba('chat', this)">💬 Chat do Lóbi</button>
             </div>
+
+            <!-- PLAYER BGM COM CONTROLE -->
+            <div class="bgm-controls">
+                <span class="bgm-title">Música Hextech</span>
+                <button class="bgm-btn clickable" id="bgm-toggle-btn" onclick="toggleBGM()">⏸</button>
+            </div>
+        </div>
+
+        <div class="content-area">
             
-            <div class="status-bars">
-                <div class="bar-container">
-                    <div class="bar-fill bar-hp" id="bar-hp"></div>
-                    <div class="bar-text" id="txt-hp">600 / 600</div>
-                </div>
-                <div class="bar-container">
-                    <div class="bar-fill bar-mana" id="bar-mana"></div>
-                    <div class="bar-text" id="txt-mana">300 / 300</div>
-                </div>
-            </div>
-
-            <div class="inventory-section">
-                <div class="inv-title">Atributos</div>
-                <div class="attributes-grid" id="ig-attributes">
-                    <!-- Preenchido no JS -->
-                </div>
-            </div>
-
-            <div class="inventory-section">
-                <div class="inv-title">Inventário</div>
-                <div class="inventory-grid">
-                    <div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div>
-                    <div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div><div class="inv-slot">Vazio</div>
-                </div>
-                <div class="trinket-slot">Trinket: Sentinela Invisível</div>
-            </div>
-        </div>
-
-        <!-- PAINEL CENTRAL: Ações de Mundo/RPG -->
-        <div class="action-panel">
-            <div class="action-header">Mundo & Combate</div>
-            <div class="rpg-map">
-                <div class="action-card">
-                    <h3>Área: Selva (Jungle)</h3>
-                    <p style="font-size:12px; color:#aaa;">Enfrente monstros neutros para ganhar ouro e experiência.</p>
-                    <div class="target-list">
-                        <button class="btn target-btn" onclick="executarAcao('farm', 'Aronguejo')">Atacar Aronguejo</button>
-                        <button class="btn target-btn" onclick="executarAcao('farm', 'Rubrivira (Red)')">Fazer Red</button>
-                        <button class="btn target-btn" onclick="executarAcao('farm', 'Azuporã (Blue)')">Fazer Blue</button>
+            <!-- =========================================
+                 ABA 1: SELEÇÃO DE CAMPEÕES & VISUALIZADOR
+                 ========================================= -->
+            <div id="view-selecao" class="view-panel active">
+                <div class="champ-select-layout">
+                    
+                    <!-- ROSTER LATERAL -->
+                    <div class="roster-sidebar">
+                        <div class="roster-header">Campeões Disponíveis</div>
+                        <div class="roster-grid" id="roster-grid">
+                            <!-- Injetado via JS -->
+                        </div>
                     </div>
-                </div>
 
-                <div class="action-card">
-                    <h3>Área: Rotas (Lanes)</h3>
-                    <p style="font-size:12px; color:#aaa;">Avance contra tropas inimigas e estruturas.</p>
-                    <div class="target-list">
-                        <button class="btn target-btn" onclick="executarAcao('lane', 'Minion Guerreiro')">Farmar Minions</button>
-                        <button class="btn target-btn" onclick="executarAcao('torre', 'Torre T1')">Atacar Torre</button>
-                    </div>
-                </div>
+                    <!-- SHOWCASE DO CAMPEÃO SELECIONADO -->
+                    <div class="champ-showcase" id="champ-showcase">
+                        <div class="showcase-header">
+                            <div class="champ-identity">
+                                <span class="champ-title-badge" id="c-title">Título do Campeão</span>
+                                <h1 class="champ-main-name" id="c-name">Nome do Campeão</h1>
+                                <div class="champ-quote-box" id="c-quote">"Frase marcante do campeão."</div>
+                            </div>
 
-                <div class="action-card">
-                    <h3>Batalha PvP (Equipe Inimiga)</h3>
-                    <p style="font-size:12px; color:#aaa;">Selecione um alvo para iniciar o turno de combate.</p>
-                    <div class="target-list" id="enemy-targets">
-                        <!-- Inimigos injetados no JS após matchmaking -->
+                            <!-- ATRIBUTOS DO PERSONAGEM (ESTILO LOL PC) -->
+                            <div class="stats-container">
+                                <div class="stat-item">
+                                    <span class="stat-label">Dano</span>
+                                    <div class="stat-bar-bg"><div class="stat-bar-fill" id="st-dano"></div></div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Resistência</span>
+                                    <div class="stat-bar-bg"><div class="stat-bar-fill" id="st-defensa"></div></div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Magia</span>
+                                    <div class="stat-bar-bg"><div class="stat-bar-fill" id="st-magia"></div></div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Dificuldade</span>
+                                    <div class="stat-bar-bg"><div class="stat-bar-fill" id="st-dificuldade"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LISTA DE HABILIDADES -->
+                        <div class="abilities-section">
+                            <div class="section-title">Habilidades do Campeão</div>
+                            <div id="abilities-list" style="display: flex; flex-direction: column; gap: 15px;">
+                                <!-- Injetado via JS -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- PAINEL DIREITO: Chat Log da Partida -->
-        <div class="chat-container">
-            <div class="chat-header">Diário de Batalha (Chat)</div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="message msg-sys">Bem-vindos a Summoner's Rift. As tropas foram liberadas.</div>
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Comunique-se com a equipe..." onkeypress="if(event.key === 'Enter') enviarMensagem()">
-                <button class="btn" id="btn-send" onclick="enviarMensagem()">Falar</button>
-            </div>
-        </div>
+            <!-- =========================================
+                 ABA 2: CHAT DO LÓBI (SEPARADO)
+                 ========================================= -->
+            <div id="view-chat" class="view-panel">
+                <div class="chat-view-layout">
+                    <div class="chat-rooms-sidebar">
+                        <div class="roster-header" style="margin-bottom: 10px;">Salas do Chat</div>
+                        <button class="room-select-btn active clickable" onclick="mudarSala('Geral', this)"># Geral</button>
+                        <button class="room-select-btn clickable" onclick="mudarSala('Taverna do Poro', this)"># Taverna do Poro</button>
+                        <button class="room-select-btn clickable" onclick="mudarSala('Busca de Grupo', this)"># Busca de Grupo</button>
+                    </div>
 
+                    <div class="chat-main-panel">
+                        <div class="chat-header-bar" id="chat-title-display">SALA: Geral</div>
+                        <div class="chat-feed" id="chat-feed-box">
+                            <div class="chat-msg sys">Conectando ao canal mágico de comunicação...</div>
+                        </div>
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-input-field" placeholder="Digite sua mensagem para a sala..." onkeypress="if(event.key === 'Enter') enviarMensagem()">
+                            <button class="btn clickable" style="width: 140px;" onclick="enviarMensagem()">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
+
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
         // ==========================================
-        // SISTEMA DE EFEITOS SONOROS GLOBAIS
+        // EFEITOS SONOROS SINTETIZADOS (WEB AUDIO API)
         // ==========================================
-        document.addEventListener('click', () => {
-            const sfx = document.getElementById('click-sfx');
-            sfx.currentTime = 0;
-            sfx.volume = 0.3;
-            sfx.play().catch(()=>{});
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } else if (type === 'hover') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 0.04);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            }
+        }
+
+        // Adiciona listeners para os efeitos sonoros do mouse
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.clickable, button, input, .champ-card')) {
+                playSound('hover');
+            }
         });
 
-        // Configuração de Música
-        document.addEventListener('DOMContentLoaded', () => {
-            const bgm = document.getElementById('bg-music');
-            bgm.volume = 0.1;
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.clickable, button, input, .champ-card')) {
+                playSound('click');
+            }
         });
 
         // ==========================================
-        // DADOS RICOS (RPG STATS & SKILLS)
+        // DADOS DOS CAMPEÕES
         // ==========================================
         const campeoes = {
             litlegot: {
                 id: 'litlegot', name: 'Litlegot', title: 'O Mago das Tintas',
-                icon: 'https://ddragon.leagueoflegends.com/cdn/13.19.1/img/champion/Hwei.png', // Usando icones genéricos/oficiais para simular
-                stats: { hp: 550, maxHp: 550, mana: 400, maxMana: 400, ad: 50, ap: 75, defF: 25, defM: 30, vampF: 0, vampM: 5, atkSpd: 0.62, hpRegen: 5, manaRegen: 8 }
+                quote: 'Não me culpe pelos erros, é seu dever corrigi-los.',
+                icon: 'personagens/litlegot.jpeg',
+                stats: { dano: 50, defensa: 30, magia: 95, dificuldade: 85 },
+                abilities: [
+                    { key: 'P', name: 'Aspiriração', desc: 'Permite aos aliados comprar itens fora da base desenhando mercadores estáticos pelo mapa.', icon: 'habilidades/litlegot/passiva.jpg' },
+                    { key: 'Q', name: 'Ódio', desc: 'Desenha fogo puro no mapa causando dano contínuo por 4s equivalente a 10% da vida máxima.', icon: 'habilidades/litlegot/1_hab.jpg' },
+                    { key: 'W', name: 'Empatia', desc: 'Desenha água calmante concedendo cura e escudo a aliados e lentidão a inimigos.', icon: 'habilidades/litlegot/2_hab.jpg' },
+                    { key: 'E', name: 'Felicidade', desc: 'Pinta clarões de luz que cegam e enraízam inimigos no chão.', icon: 'habilidades/litlegot/3_hab.jpg' },
+                    { key: 'R', name: 'Gênesis', desc: 'Mistura as últimas tintas para alterar permanentemente as skills Q, W e E para uma cor secundária.', icon: 'habilidades/litlegot/R_hab.jpg',
+                      isUltimate: true,
+                      genesis: {
+                          laranja: [
+                              { key: 'Q', name: 'Euforia', desc: 'Explosão de confetes em área concedendo bônus de velocidade.', icon: 'habilidades/litlegot/orange_q.jpg' },
+                              { key: 'W', name: 'Aconchego', desc: 'Círculo de regeneração contínua e resistência a lentidão.', icon: 'habilidades/litlegot/orange_w.jpg' },
+                              { key: 'E', name: 'Otimismo', desc: 'Mola de tinta que lança campeões na direção escolhida.', icon: 'habilidades/litlegot/orange_e.jpg' }
+                          ],
+                          verde: [
+                              { key: 'Q', name: 'Nojo', desc: 'Tinta viscosa que reduz a armadura dos alvos atingidos.', icon: 'habilidades/litlegot/green_q.jpg' },
+                              { key: 'W', name: 'Serenidade', desc: 'Campo florido que reduz o dano inimigo e concede tenacidade.', icon: 'habilidades/litlegot/green_w.jpg' },
+                              { key: 'E', name: 'Inveja', desc: 'Gavinhas espinhosas que puxam inimigos que tentarem usar avanço (dash).', icon: 'habilidades/litlegot/green_e.jpg' }
+                          ],
+                          roxo: [
+                              { key: 'Q', name: 'Melancolia', desc: 'Tinta triste que aplica uma lentidão severa progressiva.', icon: 'habilidades/litlegot/purple_q.jpg' },
+                              { key: 'W', name: 'Paranoia', desc: 'Pinta sombras que reduzem drasticamente a visão dos inimigos.', icon: 'habilidades/litlegot/purple_w.jpg' },
+                              { key: 'E', name: 'Fascínio', desc: 'Portal hipnótico que faz inimigos andarem em sua direção.', icon: 'habilidades/litlegot/purple_e.jpg' }
+                          ]
+                      }
+                    }
+                ]
             },
             abrax: {
                 id: 'abrax', name: 'Abrax', title: 'O Apostador Físico',
-                icon: 'https://ddragon.leagueoflegends.com/cdn/13.19.1/img/champion/Sett.png',
-                stats: { hp: 650, maxHp: 650, mana: 0, maxMana: 0, ad: 70, ap: 0, defF: 40, defM: 32, vampF: 10, vampM: 0, atkSpd: 0.75, hpRegen: 8, manaRegen: 0 }
+                quote: 'Me mostre o que sabe fazer e eu farei melhor.',
+                icon: 'personagens/abrax.jpeg',
+                stats: { dano: 90, defensa: 60, magia: 20, dificuldade: 70 },
+                abilities: [
+                    { key: 'P', name: 'A Falácia do Apostador', desc: 'Ganha vampirismo universal progressivo com base na taxa de acerto crítico.', icon: 'habilidades/abrax/passiva.jpg' },
+                    { key: 'Q', name: 'Máscaras dos Tolos', desc: 'Permite registrar o ID de habilidades para copiar e reutilizar suas mecânicas.', icon: 'habilidades/abrax/1_hab.jpg' },
+                    { key: 'W', name: 'Honestamente?', desc: 'Dash ágil para reboque e reposicionamento instantâneo.', icon: 'habilidades/abrax/2_hab.jpg' },
+                    { key: 'E', name: 'Sobrecarga', desc: 'Empurrão violento em área que atordoa alvos próximos.', icon: 'habilidades/litlegot/3_hab.jpg' },
+                    { key: 'R', name: 'No Limite', desc: 'Transcende ganhando velocidade de ataque massiva e vampirismo extremo.', icon: 'habilidades/abrax/r_hab.jpg' }
+                ]
             },
             psique: {
                 id: 'psique', name: 'Psique', title: 'Lutador Espiritual',
-                icon: 'https://ddragon.leagueoflegends.com/cdn/13.19.1/img/champion/Yone.png',
-                stats: { hp: 600, maxHp: 600, mana: 200, maxMana: 200, ad: 65, ap: 20, defF: 35, defM: 35, vampF: 5, vampM: 5, atkSpd: 0.85, hpRegen: 6, manaRegen: 4 }
+                quote: 'Venha desfrutar da liberdade que lhes tenho a oferecer.',
+                icon: 'personagens/psique.jpeg',
+                stats: { dano: 80, defensa: 75, magia: 40, dificuldade: 60 },
+                abilities: [
+                    { key: 'P', name: 'O Prazer dos Mortos', desc: 'Rouba atributos base, vida e mana permanentemente de alvos atingidos.', icon: 'habilidades/psique/passiva.jpg' },
+                    { key: 'Q', name: 'Hora de Comer', desc: 'Causa dano extra explosivo e se cura proporcionalmente ao dano crítico.', icon: 'habilidades/psique/1_hab.jpg' },
+                    { key: 'W', name: 'Véu do Além', desc: 'Avanço com invisibilidade completa até o próximo ataque.', icon: 'habilidades/psique/2_hab.jpg' },
+                    { key: 'E', name: 'Borboletas Espirituais', desc: 'Coleta últimas habilidades de heróis para usar em si ou repassar a um aliado.', icon: 'habilidades/psique/3_hab.jpg' },
+                    { key: 'R', name: 'Área da Vida e Morte', desc: 'Zona expansiva que cura Psique enquanto drena a força vital dos inimigos.', icon: 'habilidades/psique/r_hab.jpg' }
+                ]
             }
         };
 
         // ==========================================
-        // ESTADOS DO JOGO
+        // BANCO DE DADOS FIREBASE (SALA DE CHAT)
         // ==========================================
-        let currentUser = { nome: "", equipe: "", campeao: null, isSpectator: false };
-        let jogadoresLobby = [];
-        let equipeVermelha = [];
-        let equipeAzul = [];
+        const firebaseConfig = {
+            apiKey: "AIzaSyBykDF5TNKQHejUJTp-ue7s5CKfpJp1HV0",
+            authDomain: "mestre-471a0.firebaseapp.com",
+            databaseURL: "https://mestre-471a0-default-rtdb.firebaseio.com",
+            projectId: "mestre-471a0",
+            storageBucket: "mestre-471a0.firebasestorage.app",
+            messagingSenderId: "142996111628",
+            appId: "1:142996111628:web:c3785e54588632f468c929"
+        };
 
-        // ==========================================
-        // NAVEGAÇÃO ENTRE TELAS
-        // ==========================================
-        function mostrarTela(idTela) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(idTela).classList.add('active');
+        let db = null;
+        let currentUser = "";
+        let currentRoom = "Geral";
+        let currentChamp = null;
+        let chatRef = null;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch (e) {
+            console.warn("Firebase operando em modo offline.");
         }
 
-        function entrarLobby() {
-            const nome = document.getElementById('username').value.trim();
-            if(!nome) { alert("Digite seu nome!"); return; }
-            
-            currentUser.nome = nome;
-            jogadoresLobby.push({ nome: nome, isBot: false });
-            
-            atualizarLobby();
-            mostrarTela('lobby-screen');
-        }
-
         // ==========================================
-        // MATCHMAKING & LOBBY
+        // LÓGICA DE INTERFACE & NAVEGAÇÃO
         // ==========================================
-        function convidarBot() {
-            const nomesBots = ["Faker (Bot)", "ShowMaker (Bot)", "Rekkles (Bot)", "Caps (Bot)"];
-            const botNome = nomesBots[Math.floor(Math.random() * nomesBots.length)] + " #" + Math.floor(Math.random()*1000);
-            jogadoresLobby.push({ nome: botNome, isBot: true });
-            atualizarLobby();
+        function fazerLogin() {
+            const user = document.getElementById('username').value.trim();
+            if (!user) { alert("Informe o Nome de Invocador!"); return; }
+            currentUser = user;
+
+            document.getElementById('login-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-client').style.display = 'flex';
+                
+                // Iniciar música de fundo
+                const bgm = document.getElementById('bgm-player');
+                bgm.volume = 0.3;
+                bgm.play().catch(() => console.log("Interação requerida para áudio automático."));
+
+                renderRoster();
+                selecionarCampeao('litlegot');
+                iniciarChat(currentRoom);
+            }, 500);
         }
 
-        function atualizarLobby() {
-            const container = document.getElementById('lobby-players');
-            document.getElementById('player-count').innerText = `Jogadores: ${jogadoresLobby.length}`;
-            container.innerHTML = '';
-            jogadoresLobby.forEach(j => {
-                container.innerHTML += `<div class="player-card">${j.nome}</div>`;
-            });
-        }
-
-        function iniciarMatchmaking() {
-            if(jogadoresLobby.length === 0) return;
-
-            // Embaralha array
-            let embaralhado = [...jogadoresLobby].sort(() => 0.5 - Math.random());
-            
-            equipeAzul = [];
-            equipeVermelha = [];
-            let espectador = null;
-
-            // Se for ímpar e maior que 1, tira 1 para espectador (opcional da regra, vou manter o user como jogador sempre que possivel)
-            if (embaralhado.length % 2 !== 0 && embaralhado.length > 1) {
-                // Tenta achar um bot para ser espectador, se não tiver, pega o último
-                let indexToDrop = embaralhado.findIndex(p => p.isBot);
-                if(indexToDrop === -1) indexToDrop = embaralhado.length - 1;
-                espectador = embaralhado.splice(indexToDrop, 1)[0];
-            }
-
-            // Divide no meio
-            const meio = Math.ceil(embaralhado.length / 2);
-            equipeAzul = embaralhado.slice(0, meio);
-            equipeVermelha = embaralhado.slice(meio);
-
-            // Define status do usuário atual
-            if(espectador && espectador.nome === currentUser.nome) {
-                currentUser.isSpectator = true;
-                currentUser.equipe = "Espectador";
-            } else if (equipeAzul.find(p => p.nome === currentUser.nome)) {
-                currentUser.equipe = "Azul";
+        function toggleBGM() {
+            const bgm = document.getElementById('bgm-player');
+            const btn = document.getElementById('bgm-toggle-btn');
+            if (bgm.paused) {
+                bgm.play();
+                btn.innerText = '⏸';
             } else {
-                currentUser.equipe = "Vermelha";
+                bgm.pause();
+                btn.innerText = '▶';
             }
-
-            carregarSelecaoCampeoes();
-            mostrarTela('champ-select-screen');
         }
 
-        // ==========================================
-        // SELEÇÃO DE CAMPEÕES
-        // ==========================================
-        function carregarSelecaoCampeoes() {
-            const rosterDiv = document.getElementById('roster');
-            rosterDiv.innerHTML = '';
+        function mudarAba(aba, btn) {
+            document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`view-${aba}`).classList.add('active');
+        }
+
+        function renderRoster() {
+            const grid = document.getElementById('roster-grid');
+            grid.innerHTML = '';
             for (const key in campeoes) {
-                const champ = campeoes[key];
-                const btn = document.createElement('div');
-                btn.className = 'champ-icon-btn';
-                btn.id = `btn-${champ.id}`;
-                btn.onclick = () => selecionarCampeao(champ.id);
-                btn.innerHTML = `
-                    <img src="${champ.icon}">
-                    <span style="position:absolute; bottom:5px; background:rgba(0,0,0,0.8); width:100%; text-align:center;">${champ.name}</span>
+                const c = campeoes[key];
+                const card = document.createElement('div');
+                card.className = 'champ-card clickable';
+                card.id = `card-${c.id}`;
+                card.onclick = () => selecionarCampeao(c.id);
+                card.innerHTML = `
+                    <img src="${c.icon}" onerror="this.style.display='none';">
+                    <div class="champ-card-name">${c.name}</div>
                 `;
-                rosterDiv.appendChild(btn);
+                grid.appendChild(card);
             }
         }
 
         function selecionarCampeao(id) {
-            document.querySelectorAll('.champ-icon-btn').forEach(b => b.classList.remove('selected'));
-            document.getElementById(`btn-${id}`).classList.add('selected');
-            
-            const champ = campeoes[id];
-            currentUser.campeao = champ;
+            document.querySelectorAll('.champ-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById(`card-${id}`).classList.add('selected');
+            currentChamp = campeoes[id];
 
-            document.getElementById('c-name').innerText = champ.name;
-            document.getElementById('c-title').innerText = champ.title;
-            
-            const s = champ.stats;
-            document.getElementById('c-stats').innerHTML = `
-                <b>Vida:</b> ${s.hp} | <b>Mana:</b> ${s.mana}<br>
-                <b>AD:</b> ${s.ad} | <b>AP:</b> ${s.ap}<br>
-                <b>Armadura:</b> ${s.defF} | <b>Res. Magica:</b> ${s.defM}
-            `;
-            document.getElementById('btn-lockin').style.display = 'block';
-        }
+            // Atualiza Header
+            document.getElementById('c-name').innerText = currentChamp.name;
+            document.getElementById('c-title').innerText = currentChamp.title;
+            document.getElementById('c-quote').innerText = `"${currentChamp.quote}"`;
 
-        function confirmarCampeao() {
-            montarInterfaceInGame();
-            mostrarTela('in-game-screen');
-            adicionarMensagemSistema(`A partida começou! Você está na Equipe ${currentUser.equipe}.`);
-        }
+            // Atualiza Status
+            document.getElementById('st-dano').style.width = currentChamp.stats.dano + '%';
+            document.getElementById('st-defensa').style.width = currentChamp.stats.defensa + '%';
+            document.getElementById('st-magia').style.width = currentChamp.stats.magia + '%';
+            document.getElementById('st-dificuldade').style.width = currentChamp.stats.dificuldade + '%';
 
-        // ==========================================
-        // INTERFACE IN-GAME E SISTEMA RPG
-        // ==========================================
-        function montarInterfaceInGame() {
-            const c = currentUser.campeao;
-            const s = c.stats;
+            // Renderiza Habilidades
+            const abList = document.getElementById('abilities-list');
+            abList.innerHTML = '';
 
-            // Retrato e Barras
-            document.getElementById('ig-portrait').src = c.icon;
-            document.getElementById('txt-hp').innerText = `${s.hp} / ${s.maxHp}`;
-            document.getElementById('txt-mana').innerText = s.maxMana > 0 ? `${s.mana} / ${s.maxMana}` : `Sem Mana`;
+            currentChamp.abilities.forEach(ab => {
+                const card = document.createElement('div');
+                card.className = 'ability-card';
+                
+                let content = `
+                    <div class="ability-icon-wrapper">
+                        <img src="${ab.icon}" onerror="this.style.display='none';">
+                        <div class="ability-key">${ab.key}</div>
+                    </div>
+                    <div class="ability-details">
+                        <div class="ability-title">${ab.name}</div>
+                        <div class="ability-description">${ab.desc}</div>
+                `;
 
-            // Atributos Grid
-            const attrGrid = document.getElementById('ig-attributes');
-            attrGrid.innerHTML = `
-                <div class="attr-item"><span>AD: ${s.ad}</span></div>
-                <div class="attr-item"><span>AP: ${s.ap}</span></div>
-                <div class="attr-item"><span>Armadura: ${s.defF}</span></div>
-                <div class="attr-item"><span>Res. Mágica: ${s.defM}</span></div>
-                <div class="attr-item"><span>Vamp Fis.: ${s.vampF}%</span></div>
-                <div class="attr-item"><span>Vamp Mag.: ${s.vampM}%</span></div>
-                <div class="attr-item"><span>Vel. Ataque: ${s.atkSpd}</span></div>
-                <div class="attr-item"><span>Regen Vida: ${s.hpRegen}</span></div>
-            `;
-
-            // Inimigos Disponíveis para Batalha
-            const inimigos = currentUser.equipe === "Azul" ? equipeVermelha : equipeAzul;
-            const targetDiv = document.getElementById('enemy-targets');
-            targetDiv.innerHTML = '';
-            
-            if(inimigos.length === 0) {
-                targetDiv.innerHTML = '<span style="color:#aaa; font-size:12px;">Nenhum inimigo encontrado.</span>';
-            } else {
-                inimigos.forEach(ini => {
-                    targetDiv.innerHTML += `<button class="btn target-btn" onclick="executarAcao('pvp', '${ini.nome}')">Atacar ${ini.nome}</button>`;
-                });
-            }
-        }
-
-        // --- MOTOR DE COMBATE RPG LOGADO NO CHAT ---
-        function executarAcao(tipo, alvo) {
-            const c = currentUser.campeao;
-            const s = c.stats;
-            
-            // Calculo base de dano (mistura de AD e AP simulada)
-            let danoBase = Math.floor(s.ad + (s.ap * 0.5)); 
-            let chanceDesvio = Math.random() * 100; // 0 a 100
-
-            if (tipo === 'farm') {
-                if(chanceDesvio < 15) {
-                    adicionarMensagemCombat(`Você tentou atacar <b>${alvo}</b>, mas errou o golpe! (Desvio)`);
-                } else {
-                    let ouro = Math.floor(Math.random() * 50) + 20;
-                    adicionarMensagemFarm(`Você derrotou <b>${alvo}</b> causando ${danoBase} de dano! Ganhou +${ouro} de Ouro.`);
-                    aplicarVampirismo(danoBase);
+                if (ab.isUltimate && ab.genesis) {
+                    content += `
+                        <div class="genesis-container">
+                            <div class="genesis-palette-tabs">
+                                <button class="palette-btn active clickable" onclick="trocarPaletaGenesis('laranja', this)">Paleta Laranja</button>
+                                <button class="palette-btn clickable" onclick="trocarPaletaGenesis('verde', this)">Paleta Verde</button>
+                                <button class="palette-btn clickable" onclick="trocarPaletaGenesis('roxo', this)">Paleta Roxa</button>
+                            </div>
+                            <div id="genesis-skills-display">
+                                ${renderGenesisSkills(ab.genesis.laranja)}
+                            </div>
+                        </div>
+                    `;
                 }
-            } 
-            else if (tipo === 'lane') {
-                adicionarMensagemFarm(`Você limpou a onda de <b>${alvo}</b>. +20 de Ouro.`);
-            }
-            else if (tipo === 'torre') {
-                adicionarMensagemCombat(`Você atacou a <b>${alvo}</b> causando ${danoBase} de dano estrutural.`);
-            }
-            else if (tipo === 'pvp') {
-                if(chanceDesvio < 25) { // Inimigos players tem mais chance de dodge
-                    adicionarMensagemCombat(`Você avançou contra o Campeão <b>${alvo}</b>, mas ele usou um Dash e desviou!`);
-                } else {
-                    adicionarMensagemCombat(`Turno de Ataque: Você atingiu <b>${alvo}</b> em cheio, causando <span style="color:#ffcc00">${danoBase} de Dano Verdadeiro</span>!`);
-                    aplicarVampirismo(danoBase);
-                }
-            }
+
+                content += `</div>`;
+                card.innerHTML = content;
+                abList.appendChild(card);
+            });
         }
 
-        function aplicarVampirismo(danoCausado) {
-            const s = currentUser.campeao.stats;
-            if(s.vampF > 0 || s.vampM > 0) {
-                let cura = Math.floor(danoCausado * ((s.vampF + s.vampM) / 100));
-                if(cura > 0) {
-                    adicionarMensagemFarm(`<i>(Vampirismo) Você recuperou ${cura} de Vida.</i>`);
-                }
-            }
-        }
-
-        // ==========================================
-        // SISTEMA DE CHAT INTERNO
-        // ==========================================
-        function enviarMensagem() {
-            const input = document.getElementById('chat-input');
-            const texto = input.value.trim();
-            if (texto === "") return;
-
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML += `
-                <div class="message msg-user">
-                    <span class="msg-name">[Eq. ${currentUser.equipe}] ${currentUser.nome}</span>
-                    <span style="color:var(--blue-light); font-size:11px;">(${currentUser.campeao.name})</span>: 
-                    <span>${texto.replace(/</g, "&lt;")}</span>
+        function renderGenesisSkills(skills) {
+            return skills.map(s => `
+                <div style="font-size:12px; margin-bottom: 6px;">
+                    <strong style="color:var(--gold);">[${s.key}] ${s.name}:</strong> 
+                    <span style="color:#B0A890;">${s.desc}</span>
                 </div>
+            `).join('');
+        }
+
+        function trocarPaletaGenesis(cor, btn) {
+            document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const display = document.getElementById('genesis-skills-display');
+            display.innerHTML = renderGenesisSkills(currentChamp.abilities[4].genesis[cor]);
+        }
+
+        // ==========================================
+        // SISTEMA DE CHAT REATIVO
+        // ==========================================
+        function mudarSala(nomeSala, btn) {
+            document.querySelectorAll('.room-select-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRoom = nomeSala;
+            document.getElementById('chat-title-display').innerText = `SALA: ${nomeSala}`;
+            iniciarChat(currentRoom);
+        }
+
+        function iniciarChat(sala) {
+            const feed = document.getElementById('chat-feed-box');
+            feed.innerHTML = '<div class="chat-msg sys">Conectando ao canal Hextech...</div>';
+
+            if (!db) {
+                feed.innerHTML = '<div class="chat-msg sys">[Modo Offline] Mensagens visíveis apenas localmente.</div>';
+                return;
+            }
+
+            if (chatRef) chatRef.off();
+
+            const salaID = sala.replace(/\s+/g, '_').toLowerCase();
+            chatRef = db.ref('chats/' + salaID);
+
+            chatRef.limitToLast(40).on('child_added', snapshot => {
+                const data = snapshot.val();
+                if (data) exibirMensagem(data.user, data.champ, data.text);
+            });
+        }
+
+        function enviarMensagem() {
+            const input = document.getElementById('chat-input-field');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const champName = currentChamp ? currentChamp.name : 'Invocador';
+
+            if (db && chatRef) {
+                chatRef.push({ user: currentUser, champ: champName, text: text });
+            } else {
+                exibirMensagem(currentUser, champName, text);
+            }
+            input.value = '';
+        }
+
+        function exibirMensagem(user, champ, text) {
+            const feed = document.getElementById('chat-feed-box');
+            if (feed.children.length === 1 && feed.children[0].classList.contains('sys')) {
+                feed.innerHTML = '';
+            }
+
+            const msg = document.createElement('div');
+            msg.className = 'chat-msg';
+            msg.innerHTML = `
+                <span class="chat-msg-user">${user}</span>
+                <span class="chat-msg-champ">(${champ})</span>
+                <span class="chat-msg-text">${sanitize(text)}</span>
             `;
-            chatBox.scrollTop = chatBox.scrollHeight;
-            input.value = "";
+            feed.appendChild(msg);
+            feed.scrollTop = feed.scrollHeight;
         }
 
-        function adicionarMensagemSistema(texto) {
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML += `<div class="message msg-sys">${texto}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
+        function sanitize(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
-
-        function adicionarMensagemCombat(texto) {
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML += `<div class="message msg-combat">${texto}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function adicionarMensagemFarm(texto) {
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML += `<div class="message msg-farm">${texto}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
     </script>
 </body>
 </html>
